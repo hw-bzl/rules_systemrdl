@@ -1,0 +1,40 @@
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+load("//systemrdl:system_rdl_library.bzl", "system_rdl_library")
+
+system_rdl_library(
+    name = "atxmega_spi",
+    srcs = ["atxmega_spi.rdl"],
+    exporter_args = {
+        "regblock": [
+            "--cpuif",
+            "axi4-lite-flat",
+        ],
+    },
+    visibility = ["//systemrdl/private/tests:__subpackages__"],
+)
+
+filegroup(
+    name = "atxmega_spi.sv",
+    srcs = ["atxmega_spi"],
+    output_group = "system_rdl_regblock",
+)
+
+build_test(
+    name = "atxmega_spi_regblock_build_test",
+    targets = [
+        ":atxmega_spi.sv",
+    ],
+)
+
+filegroup(
+    name = "atxmega_spi_html",
+    srcs = ["atxmega_spi"],
+    output_group = "system_rdl_html",
+)
+
+build_test(
+    name = "atxmega_spi_html_build_test",
+    targets = [
+        ":atxmega_spi_html",
+    ],
+)

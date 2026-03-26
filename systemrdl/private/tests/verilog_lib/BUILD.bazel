@@ -1,0 +1,5 @@
+load(":verilog_system_rdl_library_test_suite.bzl", "verilog_system_rdl_library_test_suite")
+
+verilog_system_rdl_library_test_suite(
+    name = "verilog_system_rdl_library_test_suite",
+)

@@ -1,0 +1,56 @@
+load("@bazel_skylib//rules:diff_test.bzl", "diff_test")
+load("@rules_venv//python:py_library.bzl", "py_library")
+load("//systemrdl:system_rdl_toolchain.bzl", "system_rdl_toolchain")
+load(":plugin_test.bzl", "with_extra_toolchain")
+
+py_library(
+    name = "peakrdl_dump",
+    srcs = ["peakrdl_dump.py"],
+    imports = ["."],
+    deps = [
+        "@pip_deps//peakrdl",
+    ],
+)
+
+py_library(
+    name = "peakrdl",
+    deps = [
+        ":peakrdl_dump",
+        "@pip_deps//peakrdl",
+    ],
+)
+
+system_rdl_toolchain(
+    name = "system_rdl_toolchain",
+    exporters = {
+        "html": "_html",
+        "regblock": ".sv",
+        "reglist": ".txt",
+    },
+    peakrdl = ":peakrdl",
+    peakrdl_config = "peakrdl.toml",
+)
+
+toolchain(
+    name = "toolchain",
+    toolchain = ":system_rdl_toolchain",
+    toolchain_type = "//systemrdl:toolchain_type",
+)
+
+with_extra_toolchain(
+    name = "atxmega_spi_with_plugin",
+    extra_toolchain = "//systemrdl/private/tests/plugin:toolchain",
+    target = "//systemrdl/private/tests/simple:atxmega_spi",
+)
+
+filegroup(
+    name = "atxmega_spi_reglist",
+    srcs = [":atxmega_spi_with_plugin"],
+    output_group = "system_rdl_reglist",
+)
+
+diff_test(
+    name = "reglist_output_test",
+    file1 = ":atxmega_spi_reglist",
+    file2 = "expected_dump.txt",
+)

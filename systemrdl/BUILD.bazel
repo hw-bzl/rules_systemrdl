@@ -1,0 +1,61 @@
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+
+exports_files(
+    [
+        "defs.bzl",
+        "requirements.in",
+        "system_rdl_info.bzl",
+        "system_rdl_library.bzl",
+        "system_rdl_toolchain.bzl",
+        "verilog_system_rdl_library.bzl",
+    ],
+)
+
+toolchain_type(
+    name = "toolchain_type",
+    visibility = ["//visibility:public"],
+)
+
+bzl_library(
+    name = "defs_bzl",
+    srcs = ["defs.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":system_rdl_info_bzl",
+        ":system_rdl_library_bzl",
+        ":system_rdl_toolchain_bzl",
+        ":verilog_system_rdl_library_bzl",
+        "//systemrdl/private:bzl_lib",
+    ],
+)
+
+bzl_library(
+    name = "system_rdl_info_bzl",
+    srcs = ["system_rdl_info.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["//systemrdl/private:bzl_lib"],
+)
+
+bzl_library(
+    name = "system_rdl_library_bzl",
+    srcs = ["system_rdl_library.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["//systemrdl/private:bzl_lib"],
+)
+
+bzl_library(
+    name = "system_rdl_toolchain_bzl",
+    srcs = ["system_rdl_toolchain.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["//systemrdl/private:bzl_lib"],
+)
+
+bzl_library(
+    name = "verilog_system_rdl_library_bzl",
+    srcs = ["verilog_system_rdl_library.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//systemrdl/private:bzl_lib",
+        "@rules_verilog//verilog:verilog_info_bzl",
+    ],
+)

@@ -1,0 +1,33 @@
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+load("@rules_venv//python:py_binary.bzl", "py_binary")
+load(":system_rdl.bzl", "system_rdl_peakrdl_toolchain_alias")
+
+system_rdl_peakrdl_toolchain_alias(
+    name = "current_system_rdl_peakrdl_toolchain",
+)
+
+alias(
+    name = "peakrdl",
+    actual = "peakrdl_wrapper",
+    visibility = ["//visibility:public"],
+)
+
+py_binary(
+    name = "peakrdl_wrapper",
+    srcs = [
+        "peakrdl_wrapper.py",
+    ],
+    main = "peakrdl_wrapper.py",
+    deps = [
+        ":current_system_rdl_peakrdl_toolchain",
+    ],
+)
+
+bzl_library(
+    name = "bzl_lib",
+    srcs = glob(["*.bzl"]),
+    visibility = ["//systemrdl:__pkg__"],
+    deps = [
+        "@rules_venv//python:defs_bzl",
+    ],
+)
