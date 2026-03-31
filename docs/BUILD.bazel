@@ -30,6 +30,15 @@ stardoc(
 )
 
 stardoc(
+    name = "system_rdl_info_doc",
+    out = "src/system_rdl_info.md",
+    input = "//systemrdl:system_rdl_info.bzl",
+    table_of_contents_template = "@io_bazel_stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
+    tags = ["manual"],
+    deps = ["//systemrdl:defs_bzl"],
+)
+
+stardoc(
     name = "verilog_system_rdl_library_doc",
     out = "src/verilog_system_rdl_library.md",
     input = "//systemrdl:verilog_system_rdl_library.bzl",
@@ -39,9 +48,9 @@ stardoc(
 )
 
 stardoc(
-    name = "system_rdl_info_doc",
-    out = "src/system_rdl_info.md",
-    input = "//systemrdl:system_rdl_info.bzl",
+    name = "vhdl_system_rdl_library_doc",
+    out = "src/vhdl_system_rdl_library.md",
+    input = "//systemrdl:vhdl_system_rdl_library.bzl",
     table_of_contents_template = "@io_bazel_stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
     tags = ["manual"],
     deps = ["//systemrdl:defs_bzl"],
@@ -55,6 +64,7 @@ mdbook(
         ":system_rdl_library_doc",
         ":system_rdl_toolchain_doc",
         ":verilog_system_rdl_library_doc",
+        ":vhdl_system_rdl_library_doc",
     ],
     book = "book.toml",
     # Windows builds are typically super slow in CI so they're avoided.

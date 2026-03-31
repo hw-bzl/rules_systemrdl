@@ -1,0 +1,5 @@
+load(":vhdl_system_rdl_library_test_suite.bzl", "vhdl_system_rdl_library_test_suite")
+
+vhdl_system_rdl_library_test_suite(
+    name = "vhdl_system_rdl_library_test_suite",
+)
