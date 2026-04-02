@@ -1,0 +1,6 @@
+common --enable_platform_specific_config
+
+build --incompatible_disallow_empty_glob=true
+build --nolegacy_external_runfiles
+build --incompatible_default_to_explicit_init_py
+build --incompatible_autoload_externally=

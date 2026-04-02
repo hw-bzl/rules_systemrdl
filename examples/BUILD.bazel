@@ -1,0 +1,53 @@
+load("@bazel_skylib//rules:diff_test.bzl", "diff_test")
+load(
+    "@rules_systemrdl//systemrdl:defs.bzl",
+    "system_rdl_library",
+    "verilog_system_rdl_library",
+    "vhdl_system_rdl_library",
+)
+
+system_rdl_library(
+    name = "atxmega_spi",
+    srcs = ["atxmega_spi.rdl"],
+    exporter_args = {
+        "regblock": [
+            "--cpuif",
+            "axi4-lite-flat",
+        ],
+    },
+)
+
+verilog_system_rdl_library(
+    name = "atxmega_spi_verilog",
+    lib = ":atxmega_spi",
+)
+
+vhdl_system_rdl_library(
+    name = "atxmega_spi_vhdl",
+    exporter = "regblock",
+    lib = ":atxmega_spi",
+)
+
+filegroup(
+    name = "atxmega_spi_regblock",
+    srcs = [":atxmega_spi"],
+    output_group = "system_rdl_regblock",
+)
+
+filegroup(
+    name = "atxmega_spi_html",
+    srcs = [":atxmega_spi"],
+    output_group = "system_rdl_html",
+)
+
+filegroup(
+    name = "atxmega_spi_reglist",
+    srcs = [":atxmega_spi"],
+    output_group = "system_rdl_reglist",
+)
+
+diff_test(
+    name = "reglist_output_test",
+    file1 = ":atxmega_spi_reglist",
+    file2 = "//plugin:expected_dump.txt",
+)

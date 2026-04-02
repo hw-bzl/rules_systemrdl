@@ -26,6 +26,7 @@ bzl_library(
         ":system_rdl_library_bzl",
         ":system_rdl_toolchain_bzl",
         ":verilog_system_rdl_library_bzl",
+        ":vhdl_system_rdl_library_bzl",
         "//systemrdl/private:bzl_lib",
     ],
 )

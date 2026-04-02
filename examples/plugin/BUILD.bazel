@@ -1,0 +1,16 @@
+load("@rules_venv//python:py_library.bzl", "py_library")
+
+py_library(
+    name = "peakrdl_dump",
+    srcs = ["peakrdl_dump.py"],
+    imports = ["."],
+    visibility = ["//toolchain:__pkg__"],
+    deps = [
+        "@pip_deps//peakrdl",
+    ],
+)
+
+exports_files([
+    "expected_dump.txt",
+    "peakrdl.toml",
+])
