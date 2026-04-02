@@ -62,7 +62,7 @@ Jinja2==3.1.6 \
     # https://files.pythonhosted.org/packages/62/a1/3d680cbfd5f4b8f15abc1d571870c5fc3e594bb582bc3b64ea099db13e56/jinja2-3.1.6-py3-none-any.whl#sha256=85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67
 librt==0.8.1 \
     --hash=sha256:a3b4350b13cc0e6f5bec8fa7caf29a8fb8cdc051a3bae45cfbfd7ce64f009965
-    # via mypy (>=0.6.2)
+    # via mypy (>=0.8.0)
     # https://files.pythonhosted.org/packages/9d/4d/7184806efda571887c798d573ca4134c80ac8642dcdd32f12c31b939c595/librt-0.8.1-cp311-cp311-macosx_11_0_arm64.whl#sha256=a3b4350b13cc0e6f5bec8fa7caf29a8fb8cdc051a3bae45cfbfd7ce64f009965
 Markdown==3.10.2 \
     --hash=sha256:e91464b71ae3ee7afd3017d9f358ef0baf158fd9a298db92f1d4761133824c36
@@ -79,10 +79,10 @@ mccabe==0.7.0 \
     --hash=sha256:6c2d30ab6be0e4a46919781807b4f0d834ebdd6c6e3dca0bda5a15f863427b6e
     # via pylint (<0.8,>=0.6)
     # https://files.pythonhosted.org/packages/27/1a/1f68f9ba0c207934b35b86a8ca3aad8395a3d6dd7921c0686e23853ff5a9/mccabe-0.7.0-py2.py3-none-any.whl#sha256=6c2d30ab6be0e4a46919781807b4f0d834ebdd6c6e3dca0bda5a15f863427b6e
-mypy==1.19.1 \
-    --hash=sha256:e3f276d8493c3c97930e354b2595a44a21348b320d859fb4a2b9f66da9ed27ab
+mypy==1.20.0 \
+    --hash=sha256:a17c5d0bdcca61ce24a35beb828a2d0d323d3fcf387d7512206888c900193367
     # via _main/tools/requirements/requirements.in
-    # https://files.pythonhosted.org/packages/5c/a6/ac7c7a88a3c9c54334f53a941b765e6ec6c4ebd65d3fe8cdcfbe0d0fd7db/mypy-1.19.1-cp311-cp311-macosx_11_0_arm64.whl#sha256=e3f276d8493c3c97930e354b2595a44a21348b320d859fb4a2b9f66da9ed27ab
+    # https://files.pythonhosted.org/packages/d5/0d/01399515eca280386e308cf57901e68d3a52af18691941b773b3380c1df8/mypy-1.20.0-cp311-cp311-macosx_11_0_arm64.whl#sha256=a17c5d0bdcca61ce24a35beb828a2d0d323d3fcf387d7512206888c900193367
 mypy_extensions==1.1.0 \
     --hash=sha256:1be4cccdb0f2482337c4743e60421de3a356cd97508abadd57d47403e94f5505
     # via
@@ -97,16 +97,16 @@ pathspec==1.0.4 \
     --hash=sha256:fb6ae2fd4e7c921a165808a552060e722767cfa526f99ca5156ed2ce45a5c723
     # via
     #   black (>=1.0.0)
-    #   mypy (>=0.9.0)
+    #   mypy (>=1.0.0)
     # https://files.pythonhosted.org/packages/ef/3c/2c197d226f9ea224a9ab8d197933f9da0ae0aac5b6e0f884e2b8d9c8e9f7/pathspec-1.0.4-py3-none-any.whl#sha256=fb6ae2fd4e7c921a165808a552060e722767cfa526f99ca5156ed2ce45a5c723
 peakrdl==1.5.0 \
     --hash=sha256:819ae8fb445969d125329c9b6fc1c164a1e9bef02f0594698db5bce2aa0a0277
     # via _main/tools/requirements/requirements.in
     # https://files.pythonhosted.org/packages/35/2a/1d7c2cf934e779caeddb72b7f22f74a86ad815a1cb48bdfa46c7b3af6110/peakrdl-1.5.0-py3-none-any.whl#sha256=819ae8fb445969d125329c9b6fc1c164a1e9bef02f0594698db5bce2aa0a0277
-peakrdl-cheader==1.0.0 \
-    --hash=sha256:8a5da6f29fde7e999cfb9ef530a483ce81499280a1d08273c223449d90b55221
+peakrdl-cheader==1.1.0 \
+    --hash=sha256:72bc5af33a0a353eacc88fd35e271a9f008176b758fdb0c7cfbff1f5144c42af
     # via peakrdl (~=1.0)
-    # https://files.pythonhosted.org/packages/9d/e9/3a1c6075a6146b4506937bbbd2719567266c8f01cf6f5a84499f9f610eb4/peakrdl_cheader-1.0.0-py3-none-any.whl#sha256=8a5da6f29fde7e999cfb9ef530a483ce81499280a1d08273c223449d90b55221
+    # https://files.pythonhosted.org/packages/f7/a4/112cc4f9c80c7c1373e38e33172d8219bf4db360b915dd856e2fb31a0cec/peakrdl_cheader-1.1.0-py3-none-any.whl#sha256=72bc5af33a0a353eacc88fd35e271a9f008176b758fdb0c7cfbff1f5144c42af
 peakrdl-cli==1.5.0 \
     --hash=sha256:e6d86a41f8e8cdf09021e0abfdad604f6213f8d3aaf7ea6579ccbb6f047c81ca
     # via peakrdl
@@ -119,10 +119,10 @@ peakrdl-ipxact==3.5.0 \
     --hash=sha256:930460f2b95cf5be52d7fadad416f040b68defbc17c372a58c581ee7195be364
     # via peakrdl (~=3.4)
     # https://files.pythonhosted.org/packages/70/81/778784087d63d004d8db431212153e635d89bd43fd05f61391090211d6f5/peakrdl_ipxact-3.5.0-py3-none-any.whl#sha256=930460f2b95cf5be52d7fadad416f040b68defbc17c372a58c581ee7195be364
-peakrdl-regblock==1.3.0 \
-    --hash=sha256:3a4c5065e9a0305d0eaa440afd88be211a055f814f6d8b45aaac24e47d1325bf
+peakrdl-regblock==1.3.1 \
+    --hash=sha256:d769306d834dea3dbd02cdd976f694d2009ef33dbb72bcfadc344b7de6cfb492
     # via peakrdl (~=1.0)
-    # https://files.pythonhosted.org/packages/90/47/de1a32bee3c7093ddb1dd94210c05d7ef88efa09d96d9e642b575e9dcd00/peakrdl_regblock-1.3.0-py3-none-any.whl#sha256=3a4c5065e9a0305d0eaa440afd88be211a055f814f6d8b45aaac24e47d1325bf
+    # https://files.pythonhosted.org/packages/67/69/c35c9a4d2d461a839e9041c763fcfe6294f5399e13dc554c60ecbea67e34/peakrdl_regblock-1.3.1-py3-none-any.whl#sha256=d769306d834dea3dbd02cdd976f694d2009ef33dbb72bcfadc344b7de6cfb492
 peakrdl-systemrdl==1.0.1 \
     --hash=sha256:17d72641ade637e5650a20589977a3452316ecb630f500907f4c579c0a8f7ebd
     # via peakrdl (~=1.0)
@@ -156,7 +156,7 @@ smmap==5.0.3 \
 systemrdl-compiler==1.32.2 \
     --hash=sha256:4870074e9d1f720f577966e107f7096e0c464772456ecd9e772fd2055216d6a4
     # via
-    #   peakrdl-cheader (<2,>=1.21.0)
+    #   peakrdl-cheader (~=1.31)
     #   peakrdl-cli (~=1.27)
     #   peakrdl-html (~=1.31)
     #   peakrdl-ipxact (<2,>=1.24.0)
