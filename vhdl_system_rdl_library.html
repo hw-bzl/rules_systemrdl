@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>verilog_system_rdl_library - rules_systemrdl</title>
+        <title>vhdl_system_rdl_library - rules_systemrdl</title>
 
 
         <!-- Custom HTML head -->
@@ -156,35 +156,36 @@
                 <div id="content" class="content">
                     <main>
                         <!-- Generated with Stardoc: http://skydoc.bazel.build -->
-<p>verilog_system_rdl_library</p>
+<p>vhdl_system_rdl_library</p>
 <h2 id="rules"><a class="header" href="#rules">Rules</a></h2>
 <ul>
-<li><a href="#verilog_system_rdl_library">verilog_system_rdl_library</a></li>
+<li><a href="#vhdl_system_rdl_library">vhdl_system_rdl_library</a></li>
 </ul>
-<p><a id="verilog_system_rdl_library"></a></p>
-<h2 id="verilog_system_rdl_library"><a class="header" href="#verilog_system_rdl_library">verilog_system_rdl_library</a></h2>
+<p><a id="vhdl_system_rdl_library"></a></p>
+<h2 id="vhdl_system_rdl_library"><a class="header" href="#vhdl_system_rdl_library">vhdl_system_rdl_library</a></h2>
 <pre>
-load("@rules_systemrdl//systemrdl:verilog_system_rdl_library.bzl", "verilog_system_rdl_library")
+load("@rules_systemrdl//systemrdl:vhdl_system_rdl_library.bzl", "vhdl_system_rdl_library")
 
-verilog_system_rdl_library(<a href="#verilog_system_rdl_library-name">name</a>, <a href="#verilog_system_rdl_library-exporter">exporter</a>, <a href="#verilog_system_rdl_library-lib">lib</a>)
+vhdl_system_rdl_library(<a href="#vhdl_system_rdl_library-name">name</a>, <a href="#vhdl_system_rdl_library-exporter">exporter</a>, <a href="#vhdl_system_rdl_library-lib">lib</a>, <a href="#vhdl_system_rdl_library-library">library</a>)
 </pre>
-<p>A rule which extracts a <code>verilog_library</code> from a <code>system_rdl_library</code>.</p>
+<p>A rule which extracts a <code>vhdl_library</code> from a <code>system_rdl_library</code>.</p>
 <p><strong>ATTRIBUTES</strong></p>
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
-<tr><td style="text-align: left"><a id="verilog_system_rdl_library-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
-<tr><td style="text-align: left"><a id="verilog_system_rdl_library-exporter"></a>exporter</td><td style="text-align: left">The SystemRDL exporter whose output should be wrapped as a Verilog library.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>"regblock"</code></td></tr>
-<tr><td style="text-align: left"><a id="verilog_system_rdl_library-lib"></a>lib</td><td style="text-align: left">The <code>system_rdl_library</code> to extract Verilog from.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="vhdl_system_rdl_library-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="vhdl_system_rdl_library-exporter"></a>exporter</td><td style="text-align: left">The SystemRDL exporter whose output should be wrapped as a VHDL library.</td><td style="text-align: left">String</td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="vhdl_system_rdl_library-lib"></a>lib</td><td style="text-align: left">The <code>system_rdl_library</code> to extract VHDL from.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="vhdl_system_rdl_library-library"></a>library</td><td style="text-align: left">VHDL library name this target compiles into.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>"work"</code></td></tr>
 </tbody></table>
 </div>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="system_rdl_toolchain.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="verilog_system_rdl_library.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="vhdl_system_rdl_library.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="system_rdl_info.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -194,11 +195,11 @@ verilog_system_rdl_library(<a href="#verilog_system_rdl_library-name">name</a>, 
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="system_rdl_toolchain.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="verilog_system_rdl_library.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="vhdl_system_rdl_library.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="system_rdl_info.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

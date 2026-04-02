@@ -171,6 +171,7 @@ register_toolchain(
 <li><a href="#system_rdl_library">system_rdl_library</a></li>
 <li><a href="#system_rdl_toolchain">system_rdl_toolchain</a></li>
 <li><a href="#verilog_system_rdl_library">verilog_system_rdl_library</a></li>
+<li><a href="#vhdl_system_rdl_library">vhdl_system_rdl_library</a></li>
 </ul>
 <h2 id="providers"><a class="header" href="#providers">Providers</a></h2>
 <ul>
@@ -296,6 +297,22 @@ verilog_system_rdl_library(<a href="#verilog_system_rdl_library-name">name</a>, 
 <tr><td style="text-align: left"><a id="verilog_system_rdl_library-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
 <tr><td style="text-align: left"><a id="verilog_system_rdl_library-exporter"></a>exporter</td><td style="text-align: left">The SystemRDL exporter whose output should be wrapped as a Verilog library.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>"regblock"</code></td></tr>
 <tr><td style="text-align: left"><a id="verilog_system_rdl_library-lib"></a>lib</td><td style="text-align: left">The <code>system_rdl_library</code> to extract Verilog from.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+</tbody></table>
+</div>
+<p><a id="vhdl_system_rdl_library"></a></p>
+<h2 id="vhdl_system_rdl_library"><a class="header" href="#vhdl_system_rdl_library">vhdl_system_rdl_library</a></h2>
+<pre>
+load("@rules_systemrdl//systemrdl:defs.bzl", "vhdl_system_rdl_library")
+
+vhdl_system_rdl_library(<a href="#vhdl_system_rdl_library-name">name</a>, <a href="#vhdl_system_rdl_library-exporter">exporter</a>, <a href="#vhdl_system_rdl_library-lib">lib</a>, <a href="#vhdl_system_rdl_library-library">library</a>)
+</pre>
+<p>A rule which extracts a <code>vhdl_library</code> from a <code>system_rdl_library</code>.</p>
+<p><strong>ATTRIBUTES</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="vhdl_system_rdl_library-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="vhdl_system_rdl_library-exporter"></a>exporter</td><td style="text-align: left">The SystemRDL exporter whose output should be wrapped as a VHDL library.</td><td style="text-align: left">String</td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="vhdl_system_rdl_library-lib"></a>lib</td><td style="text-align: left">The <code>system_rdl_library</code> to extract VHDL from.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="vhdl_system_rdl_library-library"></a>library</td><td style="text-align: left">VHDL library name this target compiles into.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>"work"</code></td></tr>
 </tbody></table>
 </div>
 <p><a id="SystemRdlInfo"></a></p>
