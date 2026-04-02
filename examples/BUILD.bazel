@@ -1,4 +1,5 @@
 load("@bazel_skylib//rules:diff_test.bzl", "diff_test")
+load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load(
     "@rules_systemrdl//systemrdl:defs.bzl",
     "system_rdl_library",
@@ -46,8 +47,21 @@ filegroup(
     output_group = "system_rdl_reglist",
 )
 
+write_file(
+    name = "expected_txt",
+    out = "expected.txt",
+    content = [
+        "0x0 CTRL",
+        "0x1 INTCTRL",
+        "0x2 STATUS",
+        "0x3 DATA",
+        "",
+    ],
+    newline = "unix",
+)
+
 diff_test(
     name = "reglist_output_test",
     file1 = ":atxmega_spi_reglist",
-    file2 = "//plugin:expected_dump.txt",
+    file2 = ":expected.txt",
 )
