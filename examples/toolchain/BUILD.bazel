@@ -1,0 +1,28 @@
+load("@rules_systemrdl//systemrdl:defs.bzl", "system_rdl_toolchain")
+load("@rules_venv//python:py_library.bzl", "py_library")
+
+py_library(
+    name = "peakrdl",
+    deps = [
+        "//plugin:peakrdl_dump",
+        "@pip_deps//peakrdl",
+    ],
+)
+
+system_rdl_toolchain(
+    name = "system_rdl_toolchain",
+    exporters = {
+        "html": "_html",
+        "regblock": ".sv",
+        "reglist": ".txt",
+    },
+    peakrdl = ":peakrdl",
+    peakrdl_config = "//plugin:peakrdl.toml",
+)
+
+toolchain(
+    name = "toolchain",
+    toolchain = ":system_rdl_toolchain",
+    toolchain_type = "@rules_systemrdl//systemrdl:toolchain_type",
+    visibility = ["//visibility:public"],
+)

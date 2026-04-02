@@ -30,8 +30,13 @@ load(
     ":verilog_system_rdl_library.bzl",
     _verilog_system_rdl_library = "verilog_system_rdl_library",
 )
+load(
+    ":vhdl_system_rdl_library.bzl",
+    _vhdl_system_rdl_library = "vhdl_system_rdl_library",
+)
 
 SystemRdlInfo = _SystemRdlInfo
 system_rdl_library = _system_rdl_library
 system_rdl_toolchain = _system_rdl_toolchain
 verilog_system_rdl_library = _verilog_system_rdl_library
+vhdl_system_rdl_library = _vhdl_system_rdl_library

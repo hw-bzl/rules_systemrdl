@@ -8,6 +8,7 @@ exports_files(
         "system_rdl_library.bzl",
         "system_rdl_toolchain.bzl",
         "verilog_system_rdl_library.bzl",
+        "vhdl_system_rdl_library.bzl",
     ],
 )
 
@@ -25,6 +26,7 @@ bzl_library(
         ":system_rdl_library_bzl",
         ":system_rdl_toolchain_bzl",
         ":verilog_system_rdl_library_bzl",
+        ":vhdl_system_rdl_library_bzl",
         "//systemrdl/private:bzl_lib",
     ],
 )
@@ -57,5 +59,15 @@ bzl_library(
     deps = [
         "//systemrdl/private:bzl_lib",
         "@rules_verilog//verilog:verilog_info_bzl",
+    ],
+)
+
+bzl_library(
+    name = "vhdl_system_rdl_library_bzl",
+    srcs = ["vhdl_system_rdl_library.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//systemrdl/private:bzl_lib",
+        "@rules_vhdl//vhdl:vhdl_info_bzl",
     ],
 )
