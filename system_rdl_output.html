@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>SystemRdlInfo - rules_systemrdl</title>
+        <title>system_rdl_output - rules_systemrdl</title>
 
 
         <!-- Custom HTML head -->
@@ -156,34 +156,42 @@
                 <div id="content" class="content">
                     <main>
                         <!-- Generated with Stardoc: http://skydoc.bazel.build -->
-<p>SystemRdlInfo</p>
-<h2 id="providers"><a class="header" href="#providers">Providers</a></h2>
+<p>system_rdl_output</p>
+<h2 id="rules"><a class="header" href="#rules">Rules</a></h2>
 <ul>
-<li><a href="#SystemRdlInfo">SystemRdlInfo</a></li>
+<li><a href="#system_rdl_output">system_rdl_output</a></li>
 </ul>
-<p><a id="SystemRdlInfo"></a></p>
-<h2 id="systemrdlinfo"><a class="header" href="#systemrdlinfo">SystemRdlInfo</a></h2>
+<p><a id="system_rdl_output"></a></p>
+<h2 id="system_rdl_output"><a class="header" href="#system_rdl_output">system_rdl_output</a></h2>
 <pre>
-load("@rules_systemrdl//systemrdl:system_rdl_info.bzl", "SystemRdlInfo")
+load("@rules_systemrdl//systemrdl:system_rdl_output.bzl", "system_rdl_output")
 
-SystemRdlInfo(<a href="#SystemRdlInfo-outputs">outputs</a>, <a href="#SystemRdlInfo-root">root</a>, <a href="#SystemRdlInfo-srcs">srcs</a>)
+system_rdl_output(<a href="#system_rdl_output-name">name</a>, <a href="#system_rdl_output-exporter">exporter</a>, <a href="#system_rdl_output-lib">lib</a>, <a href="#system_rdl_output-output_group">output_group</a>)
 </pre>
-<p>Info for SystemRDL targets.</p>
-<p><strong>FIELDS</strong></p>
-<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th></tr></thead><tbody>
-<tr><td style="text-align: left"><a id="SystemRdlInfo-outputs"></a>outputs</td><td style="text-align: left">Dict[str, Depset[File]]: A mapping of exporter names to their outputs.</td></tr>
-<tr><td style="text-align: left"><a id="SystemRdlInfo-root"></a>root</td><td style="text-align: left">File: The top level source file for a library.</td></tr>
-<tr><td style="text-align: left"><a id="SystemRdlInfo-srcs"></a>srcs</td><td style="text-align: left">Depset[File]: All (including transitive) source files.</td></tr>
+<p>An accessor for <code>system_rdl_library</code> targets.</p>
+<p>Outputs can be accessed using a <code>filegroup</code> via <code>output_group</code> but
+that rule will not error if you specified an invalid output group.
+Consumers who want to guarantee the outputs are generated from
+<code>system_rdl_library</code> should use this rule</p>
+<p><strong>ATTRIBUTES</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="system_rdl_output-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="system_rdl_output-exporter"></a>exporter</td><td style="text-align: left">The exporter to select outputs from. Mutually exclusive with <code>output_Group</code>.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+<tr><td style="text-align: left"><a id="system_rdl_output-lib"></a>lib</td><td style="text-align: left">The SystemRDL library.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="system_rdl_output-output_group"></a>output_group</td><td style="text-align: left">The output group to forward. Mutually exclusive with <code>exporter</code>.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
 </tbody></table>
 </div>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="verilog_system_rdl_library.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="system_rdl_library.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
+                            <a rel="next prefetch" href="system_rdl_toolchain.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
 
                         <div style="clear: both"></div>
                     </nav>
@@ -191,10 +199,13 @@ SystemRdlInfo(<a href="#SystemRdlInfo-outputs">outputs</a>, <a href="#SystemRdlI
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="verilog_system_rdl_library.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="system_rdl_library.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
+                    <a rel="next prefetch" href="system_rdl_toolchain.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
             </nav>
 
         </div>
