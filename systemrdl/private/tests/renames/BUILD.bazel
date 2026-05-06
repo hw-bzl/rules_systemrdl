@@ -1,0 +1,45 @@
+load("//systemrdl:system_rdl_library.bzl", "system_rdl_library")
+load("//systemrdl:system_rdl_output.bzl", "system_rdl_output")
+load("//tools/diff:diff_test.bzl", "diff_test")
+
+# `--rename=NAME` drives the basenames of the regblock outputs to
+# `spi_renamed.sv` / `spi_renamed_pkg.sv` and embeds `spi_renamed` as the
+# top-level SystemVerilog module name in the generated content. The diff
+# tests below pull the renamed files through `system_rdl_output` and compare
+# them against checked-in goldens, providing an end-to-end check that the
+# rename arg actually changes the produced output files.
+system_rdl_library(
+    name = "atxmega_spi_renamed",
+    srcs = ["atxmega_spi.rdl"],
+    exporter_args = {
+        "regblock": [
+            "--cpuif",
+            "axi4-lite-flat",
+            "--rename=spi_renamed",
+        ],
+    },
+)
+
+system_rdl_output(
+    name = "atxmega_spi_renamed_sv",
+    lib = ":atxmega_spi_renamed",
+    output_group = "system_rdl_regblock_sv",
+)
+
+system_rdl_output(
+    name = "atxmega_spi_renamed_pkg_sv",
+    lib = ":atxmega_spi_renamed",
+    output_group = "system_rdl_regblock_pkg_sv",
+)
+
+diff_test(
+    name = "renamed_sv_diff_test",
+    file1 = "spi_renamed.sv.golden",
+    file2 = ":atxmega_spi_renamed_sv",
+)
+
+diff_test(
+    name = "renamed_pkg_sv_diff_test",
+    file1 = "spi_renamed_pkg.sv.golden",
+    file2 = ":atxmega_spi_renamed_pkg_sv",
+)
