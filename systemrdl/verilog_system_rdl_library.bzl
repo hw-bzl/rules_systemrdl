@@ -1,4 +1,4 @@
-"""verilog_system_rdl_library"""
+"""# verilog_system_rdl_library"""
 
 load("@rules_verilog//verilog:verilog_info.bzl", "VerilogInfo")
 load("//systemrdl/private:system_rdl.bzl", "TOOLCHAIN_TYPE")
