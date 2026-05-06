@@ -6,6 +6,7 @@ exports_files(
         "requirements.in",
         "system_rdl_info.bzl",
         "system_rdl_library.bzl",
+        "system_rdl_output.bzl",
         "system_rdl_toolchain.bzl",
         "verilog_system_rdl_library.bzl",
     ],
@@ -23,6 +24,7 @@ bzl_library(
     deps = [
         ":system_rdl_info_bzl",
         ":system_rdl_library_bzl",
+        ":system_rdl_output_bzl",
         ":system_rdl_toolchain_bzl",
         ":verilog_system_rdl_library_bzl",
         "//systemrdl/private:bzl_lib",
@@ -39,6 +41,13 @@ bzl_library(
 bzl_library(
     name = "system_rdl_library_bzl",
     srcs = ["system_rdl_library.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["//systemrdl/private:bzl_lib"],
+)
+
+bzl_library(
+    name = "system_rdl_output_bzl",
+    srcs = ["system_rdl_output.bzl"],
     visibility = ["//visibility:public"],
     deps = ["//systemrdl/private:bzl_lib"],
 )

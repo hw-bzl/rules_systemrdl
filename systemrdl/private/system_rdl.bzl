@@ -7,6 +7,7 @@ TOOLCHAIN_TYPE = str(Label("//systemrdl:toolchain_type"))
 SystemRdlInfo = provider(
     doc = "Info for SystemRDL targets.",
     fields = {
+        "outputs": "Dict[str, Depset[File]]: A mapping of exporter names to their outputs.",
         "root": "File: The top level source file for a library.",
         "srcs": "Depset[File]: All (including transitive) source files.",
     },
@@ -40,7 +41,7 @@ def _system_rdl_library_impl(ctx):
 
     toolchain = ctx.toolchains[TOOLCHAIN_TYPE]
 
-    outputs = {}
+    exporter_outs = {}
     output_groups = {}
     for exporter in ctx.attr.exporter_args:
         if exporter not in toolchain.exporter_files and exporter not in toolchain.exporter_dirs:
@@ -94,7 +95,9 @@ def _system_rdl_library_impl(ctx):
                 tools = [toolchain.peakrdl_config],
             )
 
-            output_groups[output_group_name] = depset(outputs)
+            output_set = depset(outputs)
+            exporter_outs[exporter] = output_set
+            output_groups[output_group_name] = output_set
 
     return [
         DefaultInfo(
@@ -106,6 +109,7 @@ def _system_rdl_library_impl(ctx):
         SystemRdlInfo(
             srcs = srcs,
             root = root,
+            outputs = exporter_outs,
         ),
     ]
 
@@ -161,6 +165,77 @@ filegroup(
         ),
     },
     toolchains = [TOOLCHAIN_TYPE],
+)
+
+def _get_output_groups(group_info):
+    groups = []
+    for entry in dir(group_info):
+        if entry.startswith("system_rdl_"):
+            groups.append(entry)
+
+    return groups
+
+def _system_rdl_output_impl(ctx):
+    if ctx.attr.exporter and ctx.attr.output_group:
+        fail("`exporter` and `output_group` are mutually exclusive for `system_rdl_output`. Please update `{}`".format(
+            ctx.label,
+        ))
+
+    if ctx.attr.exporter:
+        rdl_info = ctx.attr.lib[SystemRdlInfo]
+        outputs = rdl_info.outputs.get(ctx.attr.exporter)
+        if not outputs:
+            fail("`{}` does not use exporter `{}`. Use one of: `{}`".format(
+                ctx.attr.lib.label,
+                ctx.attr.exporter,
+                rdl_info.outputs.keys(),
+            ))
+
+        return [DefaultInfo(
+            files = outputs,
+        )]
+
+    if ctx.attr.output_group:
+        group_info = ctx.attr.lib[OutputGroupInfo]
+        group = getattr(group_info, ctx.attr.output_group, None)
+        if not group:
+            fail("`{}` does not output_group `{}`. Use one of: `{}`".format(
+                ctx.attr.lib.label,
+                ctx.attr.output_group,
+                _get_output_groups(group_info),
+            ))
+
+        return [DefaultInfo(
+            files = group,
+        )]
+
+    fail("Either `exporter` or `output_group` is required for `system_rdl_output`. Please update `{}`".format(
+        ctx.label,
+    ))
+
+system_rdl_output = rule(
+    doc = """\
+An accessor for `system_rdl_library` targets.
+
+Outputs can be accessed using a `filegroup` via `output_group` but
+that rule will not error if you specified an invalid output group.
+Consumers who want to guarantee the outputs are generated from
+`system_rdl_library` should use this rule
+""",
+    implementation = _system_rdl_output_impl,
+    attrs = {
+        "exporter": attr.string(
+            doc = "The exporter to select outputs from. Mutually exclusive with `output_Group`.",
+        ),
+        "lib": attr.label(
+            doc = "The SystemRDL library.",
+            mandatory = True,
+            providers = [SystemRdlInfo, OutputGroupInfo],
+        ),
+        "output_group": attr.string(
+            doc = "The output group to forward. Mutually exclusive with `exporter`.",
+        ),
+    },
 )
 
 def _system_rdl_toolchain_impl(ctx):
@@ -247,7 +322,7 @@ system_rdl_toolchain(
 toolchain(
     name = "toolchain",
     toolchain = ":system_rdl_toolchain",
-    toolchain_type = "@rules_verilog//systemrdl:toolchain_type",
+    toolchain_type = "@rules_systemrdl//systemrdl:toolchain_type",
     visibility = ["//visibility:public"],
 )
 ```

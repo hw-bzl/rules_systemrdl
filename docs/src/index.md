@@ -18,7 +18,7 @@ Rule API details are generated from the Starlark sources in the sections linked 
 Add to `MODULE.bazel`:
 
 ```python
-bazel_dep(name = "rules_systemrdl", version = "…")
+bazel_dep(name = "rules_systemrdl", version = "{version}")
 
 register_toolchains(
     # your repository’s registered toolchain target, e.g.

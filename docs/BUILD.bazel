@@ -21,6 +21,15 @@ stardoc(
 )
 
 stardoc(
+    name = "system_rdl_output_doc",
+    out = "src/system_rdl_output.md",
+    input = "//systemrdl:system_rdl_output.bzl",
+    table_of_contents_template = "@io_bazel_stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
+    tags = ["manual"],
+    deps = ["//systemrdl:defs_bzl"],
+)
+
+stardoc(
     name = "system_rdl_toolchain_doc",
     out = "src/system_rdl_toolchain.md",
     input = "//systemrdl:system_rdl_toolchain.bzl",
@@ -53,6 +62,7 @@ mdbook(
         ":system_rdl_defs",
         ":system_rdl_info_doc",
         ":system_rdl_library_doc",
+        ":system_rdl_output_doc",
         ":system_rdl_toolchain_doc",
         ":verilog_system_rdl_library_doc",
     ],
