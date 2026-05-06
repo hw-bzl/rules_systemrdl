@@ -11,7 +11,24 @@ def _verilog_provider_test_impl(ctx):
     verilog = target[VerilogInfo]
     srcs = verilog.srcs.to_list()
 
-    asserts.equals(env, 1, len(srcs), "Expected exactly one regblock source")
+    asserts.equals(env, 2, len(srcs), "Expected only two regblock sources")
+
+    expected = [".sv", "_pkg.sv"]
+    found = []
+    for src in srcs:
+        if src.basename.endswith("_pkg.sv"):
+            found.append("_pkg.sv")
+            continue
+        if src.basename.endswith(".sv"):
+            found.append(".sv")
+            continue
+
+    asserts.equals(env, sorted(found), expected, "Failed to find srcs with expected suffix `{}`. Found `{}` from `{}`".format(
+        expected,
+        found,
+        srcs,
+    ))
+
     asserts.equals(env, [], verilog.hdrs.to_list(), "hdrs should be empty")
     asserts.equals(env, [], verilog.includes.to_list(), "includes should be empty")
     asserts.equals(env, [], verilog.data.to_list(), "data should be empty")
