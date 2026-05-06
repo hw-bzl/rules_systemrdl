@@ -1,5 +1,6 @@
 load("@bazel_skylib//rules:diff_test.bzl", "diff_test")
 load("@rules_venv//python:py_library.bzl", "py_library")
+load("//systemrdl:system_rdl_output.bzl", "system_rdl_output")
 load("//systemrdl:system_rdl_toolchain.bzl", "system_rdl_toolchain")
 load(":plugin_test.bzl", "with_extra_toolchain")
 
@@ -46,13 +47,37 @@ with_extra_toolchain(
 )
 
 filegroup(
-    name = "atxmega_spi_reglist",
+    name = "atxmega_spi_reglist_filegroup",
     srcs = [":atxmega_spi_with_plugin"],
     output_group = "system_rdl_reglist",
 )
 
 diff_test(
-    name = "reglist_output_test",
-    file1 = ":atxmega_spi_reglist",
+    name = "reglist_filegroup_output_test",
+    file1 = ":atxmega_spi_reglist_filegroup",
+    file2 = "expected_dump.txt",
+)
+
+system_rdl_output(
+    name = "atxmega_spi_reglist_out_exporter",
+    exporter = "reglist",
+    lib = ":atxmega_spi_with_plugin",
+)
+
+diff_test(
+    name = "reglist_exporter_output_test",
+    file1 = ":atxmega_spi_reglist_out_exporter",
+    file2 = "expected_dump.txt",
+)
+
+system_rdl_output(
+    name = "atxmega_spi_reglist_out_output_group",
+    lib = ":atxmega_spi_with_plugin",
+    output_group = "system_rdl_reglist",
+)
+
+diff_test(
+    name = "reglist_output_group_output_test",
+    file1 = ":atxmega_spi_reglist_out_output_group",
     file2 = "expected_dump.txt",
 )
