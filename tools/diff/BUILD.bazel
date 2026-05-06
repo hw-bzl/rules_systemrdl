@@ -1,0 +1,4 @@
+exports_files(
+    ["diff_test.py"],
+    visibility = ["//visibility:public"],
+)

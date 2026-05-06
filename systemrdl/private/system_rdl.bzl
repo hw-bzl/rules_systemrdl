@@ -61,19 +61,33 @@ def _system_rdl_library_impl(ctx):
             args.add(exporter)
             args.add_all(srcs)
             args.add_all(toolchain.default_exporter_args.get(exporter, []))
-            args.add_all(ctx.attr.exporter_args.get(exporter, []))
+
+            # Renames are only expected to be on a per-target basis.
+            exporter_args = ctx.attr.exporter_args.get(exporter, [])
+            args.add_all(exporter_args)
+
+            output_name = ctx.label.name
+            found_rename = False
+            for arg in exporter_args:
+                if found_rename:
+                    output_name = arg
+                    break
+                if arg.startswith("--rename="):
+                    _, _, output_name = arg.partition("=")
+                    break
+                if arg == "--rename":
+                    found_rename = True
 
             output_group_name = "system_rdl_{}".format(exporter)
-
             outputs = []
             for ext in extension.split(","):
                 if is_file_output:
-                    name = "{}{}".format(ctx.label.name, ext)
+                    name = "{}{}".format(output_name, ext)
                     output = ctx.actions.declare_file(name)
                     outputs.append(output)
                     output_groups["{}{}".format(output_group_name, ext.replace(".", "_"))] = depset([output])
                 else:
-                    name = "{}{}".format(ctx.label.name, ext)
+                    name = "{}{}".format(output_name, ext)
                     output = ctx.actions.declare_directory(name)
                     outputs.append(output)
                     output_groups["{}{}".format(output_group_name, ext)] = depset([output])

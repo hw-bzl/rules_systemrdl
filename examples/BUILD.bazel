@@ -1,10 +1,10 @@
-load("@bazel_skylib//rules:diff_test.bzl", "diff_test")
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load(
     "@rules_systemrdl//systemrdl:defs.bzl",
     "system_rdl_library",
     "verilog_system_rdl_library",
 )
+load("@rules_systemrdl//tools/diff:diff_test.bzl", "diff_test")
 
 system_rdl_library(
     name = "atxmega_spi",
