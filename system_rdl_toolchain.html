@@ -166,14 +166,14 @@
 <pre>
 load("@rules_systemrdl//systemrdl:system_rdl_toolchain.bzl", "system_rdl_toolchain")
 
-system_rdl_toolchain(<a href="#system_rdl_toolchain-name">name</a>, <a href="#system_rdl_toolchain-exporter_args">exporter_args</a>, <a href="#system_rdl_toolchain-exporters">exporters</a>, <a href="#system_rdl_toolchain-peakrdl">peakrdl</a>, <a href="#system_rdl_toolchain-peakrdl_config">peakrdl_config</a>)
+system_rdl_toolchain(<a href="#system_rdl_toolchain-name">name</a>, <a href="#system_rdl_toolchain-exporter_args">exporter_args</a>, <a href="#system_rdl_toolchain-exporter_dirs">exporter_dirs</a>, <a href="#system_rdl_toolchain-exporter_files">exporter_files</a>, <a href="#system_rdl_toolchain-peakrdl">peakrdl</a>, <a href="#system_rdl_toolchain-peakrdl_config">peakrdl_config</a>)
 </pre>
 <p>A SystemRDL toolchain.</p>
 <p>Plugins:</p>
 <p><a href="https://peakrdl.readthedocs.io/en/latest/for-devs/exporter-plugin.html">Additional exporters</a>
 are supported via a combination of the <code>peakrdl</code> and <code>peakrdl_config</code> attributes.</p>
 <pre><code class="language-python">load("@rules_venv//python:py_library.bzl", "py_library")
-load("//systemrdl:system_rdl_toolchain.bzl", "system_rdl_toolchain")
+load("@rules_systemrdl//systemrdl:system_rdl_toolchain.bzl", "system_rdl_toolchain")
 
 py_library(
     name = "peakrdl_toml",
@@ -185,7 +185,7 @@ py_library(
 )
 
 PLUGINS = [
-    ":peakrdl_toml
+    ":peakrdl_toml"
 ]
 
 py_library(
@@ -199,10 +199,12 @@ system_rdl_toolchain(
     name = "system_rdl_toolchain",
     peakrdl = ":peakrdl",
     peakrdl_config = "peakrdl.toml",
-    exporters = {
-        "html": "_html",
-        "regblock": ".sv",
+    exporter_files = {
+        "regblock": ".sv,_pkg.sv",
         "toml": ".toml",
+    },
+    exporter_dirs = {
+        "html": "_html",
     },
 )
 
@@ -226,7 +228,8 @@ output group <code>system_rdl_toml</code> that is the output of the custom expor
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
 <tr><td style="text-align: left"><a id="system_rdl_toolchain-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
 <tr><td style="text-align: left"><a id="system_rdl_toolchain-exporter_args"></a>exporter_args</td><td style="text-align: left">A pair of <code>exporters</code> keys to a list of default exporter args to apply to all rules.</td><td style="text-align: left"><a href="https://bazel.build/rules/lib/dict">Dictionary: String -&gt; List of strings</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>{}</code></td></tr>
-<tr><td style="text-align: left"><a id="system_rdl_toolchain-exporters"></a>exporters</td><td style="text-align: left">A mapping of exporters to expected output file formats.</td><td style="text-align: left"><a href="https://bazel.build/rules/lib/dict">Dictionary: String -&gt; String</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>{"html": "_html", "regblock": ".sv"}</code></td></tr>
+<tr><td style="text-align: left"><a id="system_rdl_toolchain-exporter_dirs"></a>exporter_dirs</td><td style="text-align: left">A mapping of exporters to expected output directories formats.</td><td style="text-align: left"><a href="https://bazel.build/rules/lib/dict">Dictionary: String -&gt; String</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>{"html": "_html"}</code></td></tr>
+<tr><td style="text-align: left"><a id="system_rdl_toolchain-exporter_files"></a>exporter_files</td><td style="text-align: left">A mapping of exporters to expected output file formats.</td><td style="text-align: left"><a href="https://bazel.build/rules/lib/dict">Dictionary: String -&gt; String</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>{"regblock": ".sv,_pkg.sv"}</code></td></tr>
 <tr><td style="text-align: left"><a id="system_rdl_toolchain-peakrdl"></a>peakrdl</td><td style="text-align: left">The python library for the <code>peakrdl</code> package.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
 <tr><td style="text-align: left"><a id="system_rdl_toolchain-peakrdl_config"></a>peakrdl_config</td><td style="text-align: left">The <code>peakrdl</code> config file.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
 </tbody></table>
