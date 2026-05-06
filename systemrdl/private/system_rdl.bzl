@@ -71,13 +71,19 @@ def _system_rdl_library_impl(ctx):
                     output = ctx.actions.declare_file(name)
                     outputs.append(output)
                     output_groups["{}{}".format(output_group_name, ext.replace(".", "_"))] = depset([output])
-                    args.add_all([output], before_each = "-o", map_each = _dirname_map)
                 else:
                     name = "{}{}".format(ctx.label.name, ext)
                     output = ctx.actions.declare_directory(name)
                     outputs.append(output)
                     output_groups["{}{}".format(output_group_name, ext)] = depset([output])
-                    args.add_all([output], before_each = "-o", expand_directories = False)
+
+            args.add_all(
+                outputs,
+                before_each = "-o",
+                expand_directories = False,
+                uniquify = True,
+                map_each = _dirname_map if is_file_output else None,
+            )
 
             ctx.actions.run(
                 mnemonic = "SystemRdl{}".format(exporter.capitalize()),
