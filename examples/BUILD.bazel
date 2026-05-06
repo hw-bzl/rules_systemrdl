@@ -4,7 +4,6 @@ load(
     "@rules_systemrdl//systemrdl:defs.bzl",
     "system_rdl_library",
     "verilog_system_rdl_library",
-    "vhdl_system_rdl_library",
 )
 
 system_rdl_library(
@@ -20,12 +19,6 @@ system_rdl_library(
 
 verilog_system_rdl_library(
     name = "atxmega_spi_verilog",
-    lib = ":atxmega_spi",
-)
-
-vhdl_system_rdl_library(
-    name = "atxmega_spi_vhdl",
-    exporter = "regblock",
     lib = ":atxmega_spi",
 )
 

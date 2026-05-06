@@ -12,6 +12,9 @@ SystemRdlInfo = provider(
     },
 )
 
+def _dirname_map(file):
+    return file.dirname
+
 def _system_rdl_library_impl(ctx):
     # Collect sources ensuring that root is removed from source list so it
     # can be provided last to maintain "dependencies first, top-level last" order.
@@ -40,43 +43,52 @@ def _system_rdl_library_impl(ctx):
     outputs = {}
     output_groups = {}
     for exporter in ctx.attr.exporter_args:
-        if exporter not in toolchain.exporters:
+        if exporter not in toolchain.exporter_files and exporter not in toolchain.exporter_dirs:
             fail("Unsupported exporter command '{}'. Please update `{}` to use one of `{}`".format(
                 exporter,
                 ctx.label,
-                sorted(toolchain.exporters.keys()),
+                sorted(depset(toolchain.exporter_files.keys() + toolchain.exporter_dirs.keys()).to_list()),
             ))
 
-    for exporter, extension in toolchain.exporters.items():
-        name = "{}{}".format(ctx.label.name, extension)
+    for exporters, is_file_output in [
+        (toolchain.exporter_files, True),
+        (toolchain.exporter_dirs, False),
+    ]:
+        for exporter, extension in exporters.items():
+            args = ctx.actions.args()
+            args.add("--peakrdl-cfg", toolchain.peakrdl_config)
+            args.add(exporter)
+            args.add_all(srcs)
+            args.add_all(toolchain.default_exporter_args.get(exporter, []))
+            args.add_all(ctx.attr.exporter_args.get(exporter, []))
 
-        if extension.startswith("."):
-            output = ctx.actions.declare_file(name)
-            output_path = output.dirname
-        else:
-            output = ctx.actions.declare_directory(name)
-            output_path = output.path
+            output_group_name = "system_rdl_{}".format(exporter)
 
-        outputs[exporter] = output
+            outputs = []
+            for ext in extension.split(","):
+                if is_file_output:
+                    name = "{}{}".format(ctx.label.name, ext)
+                    output = ctx.actions.declare_file(name)
+                    outputs.append(output)
+                    output_groups["{}{}".format(output_group_name, ext.replace(".", "_"))] = depset([output])
+                    args.add_all([output], before_each = "-o", map_each = _dirname_map)
+                else:
+                    name = "{}{}".format(ctx.label.name, ext)
+                    output = ctx.actions.declare_directory(name)
+                    outputs.append(output)
+                    output_groups["{}{}".format(output_group_name, ext)] = depset([output])
+                    args.add_all([output], before_each = "-o", expand_directories = False)
 
-        args = ctx.actions.args()
-        args.add("--peakrdl-cfg", toolchain.peakrdl_config)
-        args.add(exporter)
-        args.add_all(srcs)
-        args.add_all(toolchain.default_exporter_args.get(exporter, []))
-        args.add_all(ctx.attr.exporter_args.get(exporter, []))
-        args.add("-o", output_path)
+            ctx.actions.run(
+                mnemonic = "SystemRdl{}".format(exporter.capitalize()),
+                outputs = outputs,
+                executable = ctx.executable._peakrdl,
+                arguments = [args],
+                inputs = srcs,
+                tools = [toolchain.peakrdl_config],
+            )
 
-        ctx.actions.run(
-            mnemonic = "SystemRdl{}".format(exporter.capitalize()),
-            outputs = [output],
-            executable = ctx.executable._peakrdl,
-            arguments = [args],
-            inputs = srcs,
-            tools = [toolchain.peakrdl_config],
-        )
-
-        output_groups["system_rdl_{}".format(exporter)] = depset([output])
+            output_groups[output_group_name] = depset(outputs)
 
     return [
         DefaultInfo(
@@ -146,12 +158,21 @@ filegroup(
 )
 
 def _system_rdl_toolchain_impl(ctx):
-    for exporter in ctx.attr.exporters:
-        if " " in exporter:
-            fail("`{}` has an exporter with an illegal name: `{}`".format(
-                ctx.label,
-                exporter,
-            ))
+    all_exporters = []
+    for group in [ctx.attr.exporter_files, ctx.attr.exporter_dirs]:
+        for exporter in group:
+            if " " in exporter:
+                fail("`{}` has an exporter with an illegal name: `{}`".format(
+                    ctx.label,
+                    exporter,
+                ))
+
+            if exporter in all_exporters:
+                fail("`{}` has a duplicate exporter: `{}`".format(
+                    ctx.label,
+                    exporter,
+                ))
+            all_exporters.append(exporter)
 
     for key in ctx.attr.exporter_args:
         if key not in ctx.attr.exporters:
@@ -163,7 +184,8 @@ def _system_rdl_toolchain_impl(ctx):
 
     return [
         platform_common.ToolchainInfo(
-            exporters = ctx.attr.exporters,
+            exporter_files = ctx.attr.exporter_files,
+            exporter_dirs = ctx.attr.exporter_dirs,
             default_exporter_args = ctx.attr.exporter_args,
             peakrdl = ctx.attr.peakrdl,
             peakrdl_config = ctx.file.peakrdl_config,
@@ -181,7 +203,7 @@ are supported via a combination of the `peakrdl` and `peakrdl_config` attributes
 
 ```python
 load("@rules_venv//python:py_library.bzl", "py_library")
-load("//systemrdl:system_rdl_toolchain.bzl", "system_rdl_toolchain")
+load("@rules_systemrdl//systemrdl:system_rdl_toolchain.bzl", "system_rdl_toolchain")
 
 py_library(
     name = "peakrdl_toml",
@@ -193,7 +215,7 @@ py_library(
 )
 
 PLUGINS = [
-    ":peakrdl_toml
+    ":peakrdl_toml"
 ]
 
 py_library(
@@ -207,10 +229,12 @@ system_rdl_toolchain(
     name = "system_rdl_toolchain",
     peakrdl = ":peakrdl",
     peakrdl_config = "peakrdl.toml",
-    exporters = {
-        "html": "_html",
-        "regblock": ".sv",
+    exporter_files = {
+        "regblock": ".sv,_pkg.sv",
         "toml": ".toml",
+    },
+    exporter_dirs = {
+        "html": "_html",
     },
 )
 
@@ -240,11 +264,17 @@ output group `system_rdl_toml` that is the output of the custom exporter.
         "exporter_args": attr.string_list_dict(
             doc = "A pair of `exporters` keys to a list of default exporter args to apply to all rules.",
         ),
-        "exporters": attr.string_dict(
-            doc = "A mapping of exporters to expected output file formats.",
+        "exporter_dirs": attr.string_dict(
+            doc = "A mapping of exporters to expected output directories formats.",
             default = {
                 "html": "_html",
-                "regblock": ".sv",
+            },
+            allow_empty = False,
+        ),
+        "exporter_files": attr.string_dict(
+            doc = "A mapping of exporters to expected output file formats.",
+            default = {
+                "regblock": ".sv,_pkg.sv",
             },
             allow_empty = False,
         ),
