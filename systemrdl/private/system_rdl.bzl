@@ -107,6 +107,7 @@ def _system_rdl_library_impl(ctx):
                 arguments = [args],
                 inputs = srcs,
                 tools = [toolchain.peakrdl_config],
+                execution_requirements = {"supports-path-mapping": ""},
             )
 
             output_set = depset(outputs)
