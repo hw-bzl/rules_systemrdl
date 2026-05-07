@@ -1,4 +1,4 @@
-"""SystemRdlInfo"""
+"""# SystemRdlInfo"""
 
 load(
     "//systemrdl/private:system_rdl.bzl",
