@@ -166,7 +166,7 @@
 <pre>
 load("@rules_systemrdl//systemrdl:system_rdl_library.bzl", "system_rdl_library")
 
-system_rdl_library(<a href="#system_rdl_library-name">name</a>, <a href="#system_rdl_library-deps">deps</a>, <a href="#system_rdl_library-srcs">srcs</a>, <a href="#system_rdl_library-exporter_args">exporter_args</a>, <a href="#system_rdl_library-root">root</a>)
+system_rdl_library(<a href="#system_rdl_library-name">name</a>, <a href="#system_rdl_library-deps">deps</a>, <a href="#system_rdl_library-srcs">srcs</a>, <a href="#system_rdl_library-exporter_args">exporter_args</a>, <a href="#system_rdl_library-output_name">output_name</a>, <a href="#system_rdl_library-root">root</a>)
 </pre>
 <p>A SystemRDL library.</p>
 <p>Outputs of these rules are generally extracted via a <a href="https://bazel.build/reference/be/general#filegroup"><code>filegroup</code></a>.</p>
@@ -195,6 +195,7 @@ filegroup(
 <tr><td style="text-align: left"><a id="system_rdl_library-deps"></a>deps</td><td style="text-align: left">Additional <code>system_rdl_library</code> dependencies.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
 <tr><td style="text-align: left"><a id="system_rdl_library-srcs"></a>srcs</td><td style="text-align: left">Source files which define the entire SystemRDL dag.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
 <tr><td style="text-align: left"><a id="system_rdl_library-exporter_args"></a>exporter_args</td><td style="text-align: left">A mapping of exporter names to arguments.</td><td style="text-align: left"><a href="https://bazel.build/rules/lib/dict">Dictionary: String -&gt; List of strings</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>{}</code></td></tr>
+<tr><td style="text-align: left"><a id="system_rdl_library-output_name"></a>output_name</td><td style="text-align: left">Basename used for declared outputs (and validated against the root file's top-level addrmap). Defaults to the target name. Use this when the addrmap name in the SystemRDL source differs from the target name.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
 <tr><td style="text-align: left"><a id="system_rdl_library-root"></a>root</td><td style="text-align: left">The top source file of the SystemRDL library.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
 </tbody></table>
 </div>
