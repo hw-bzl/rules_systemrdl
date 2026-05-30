@@ -1,6 +1,11 @@
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load("//systemrdl:system_rdl_library.bzl", "system_rdl_library")
 
+exports_files(
+    ["atxmega_spi.rdl"],
+    visibility = ["//systemrdl/private/tests:__subpackages__"],
+)
+
 system_rdl_library(
     name = "atxmega_spi",
     srcs = ["atxmega_spi.rdl"],

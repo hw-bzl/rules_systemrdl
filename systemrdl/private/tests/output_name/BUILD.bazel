@@ -1,0 +1,29 @@
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+load("//systemrdl:system_rdl_library.bzl", "system_rdl_library")
+
+# Exercises the `output_name` fix-path end-to-end: the target name does NOT
+# match the top-level addrmap in the .rdl file ("atxmega_spi"), but
+# `output_name` makes the wrapper's post-execution check find the produced
+# files where Bazel declared them.
+system_rdl_library(
+    name = "mismatched_target_name",
+    srcs = ["//systemrdl/private/tests/simple:atxmega_spi.rdl"],
+    exporter_args = {
+        "regblock": [
+            "--cpuif",
+            "axi4-lite-flat",
+        ],
+    },
+    output_name = "atxmega_spi",
+)
+
+filegroup(
+    name = "mismatched_target_name_sv",
+    srcs = [":mismatched_target_name"],
+    output_group = "system_rdl_regblock",
+)
+
+build_test(
+    name = "output_name_build_test",
+    targets = [":mismatched_target_name_sv"],
+)

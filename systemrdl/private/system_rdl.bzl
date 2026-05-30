@@ -16,6 +16,18 @@ SystemRdlInfo = provider(
 def _dirname_map(file):
     return file.dirname
 
+def _extract_rename(exporter_args):
+    found_rename = False
+    for arg in exporter_args:
+        if found_rename:
+            return arg
+        if arg.startswith("--rename="):
+            _, _, value = arg.partition("=")
+            return value
+        if arg == "--rename":
+            found_rename = True
+    return None
+
 def _system_rdl_library_impl(ctx):
     # Collect sources ensuring that root is removed from source list so it
     # can be provided last to maintain "dependencies first, top-level last" order.
@@ -51,32 +63,24 @@ def _system_rdl_library_impl(ctx):
                 sorted(depset(toolchain.exporter_files.keys() + toolchain.exporter_dirs.keys()).to_list()),
             ))
 
+    rename_values = {}
+    for exporter, exporter_args in ctx.attr.exporter_args.items():
+        rename = _extract_rename(exporter_args)
+        if rename != None:
+            rename_values[exporter] = rename
+
     for exporters, is_file_output in [
         (toolchain.exporter_files, True),
         (toolchain.exporter_dirs, False),
     ]:
         for exporter, extension in exporters.items():
-            args = ctx.actions.args()
-            args.add("--peakrdl-cfg", toolchain.peakrdl_config)
-            args.add(exporter)
-            args.add_all(srcs)
-            args.add_all(toolchain.default_exporter_args.get(exporter, []))
-
-            # Renames are only expected to be on a per-target basis.
-            exporter_args = ctx.attr.exporter_args.get(exporter, [])
-            args.add_all(exporter_args)
-
-            output_name = ctx.label.name
-            found_rename = False
-            for arg in exporter_args:
-                if found_rename:
-                    output_name = arg
-                    break
-                if arg.startswith("--rename="):
-                    _, _, output_name = arg.partition("=")
-                    break
-                if arg == "--rename":
-                    found_rename = True
+            rename = rename_values.get(exporter)
+            if rename != None:
+                output_name = rename
+            elif ctx.attr.output_name:
+                output_name = ctx.attr.output_name
+            else:
+                output_name = ctx.label.name
 
             output_group_name = "system_rdl_{}".format(exporter)
             outputs = []
@@ -92,6 +96,14 @@ def _system_rdl_library_impl(ctx):
                     outputs.append(output)
                     output_groups["{}{}".format(output_group_name, ext)] = depset([output])
 
+            args = ctx.actions.args()
+            args.add_joined("--bazel-outputs", outputs, join_with = ",", expand_directories = False)
+            args.add("--")
+            args.add("--peakrdl-cfg", toolchain.peakrdl_config)
+            args.add(exporter)
+            args.add_all(srcs)
+            args.add_all(toolchain.default_exporter_args.get(exporter, []))
+            args.add_all(ctx.attr.exporter_args.get(exporter, []))
             args.add_all(
                 outputs,
                 before_each = "-o",
@@ -163,6 +175,9 @@ filegroup(
         ),
         "exporter_args": attr.string_list_dict(
             doc = "A mapping of exporter names to arguments.",
+        ),
+        "output_name": attr.string(
+            doc = "Basename used for declared outputs (and validated against the root file's top-level addrmap). Defaults to the target name. Use this when the addrmap name in the SystemRDL source differs from the target name.",
         ),
         "root": attr.label(
             doc = "The top source file of the SystemRDL library.",
