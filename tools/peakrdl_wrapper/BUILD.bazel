@@ -1,0 +1,27 @@
+load("@rules_venv//python:py_binary.bzl", "py_binary")
+load("@rules_venv//python:py_library.bzl", "py_library")
+load("@rules_venv//python/pytest:defs.bzl", "py_pytest_test")
+
+# Python files cannot live under `systemrdl/` because that namespace is owned
+# by the `systemrdl-compiler` pip package (peakrdl's parser). Putting these
+# under `tools/peakrdl_wrapper/` keeps repo-relative imports unambiguous.
+
+py_library(
+    name = "peakrdl_wrapper_lib",
+    srcs = ["peakrdl_wrapper.py"],
+    deps = ["//systemrdl/private:current_system_rdl_peakrdl_toolchain"],
+)
+
+py_binary(
+    name = "peakrdl_wrapper",
+    srcs = ["peakrdl_wrapper.py"],
+    main = "peakrdl_wrapper.py",
+    visibility = ["//visibility:public"],
+    deps = [":peakrdl_wrapper_lib"],
+)
+
+py_pytest_test(
+    name = "peakrdl_wrapper_test",
+    srcs = ["peakrdl_wrapper_test.py"],
+    deps = [":peakrdl_wrapper_lib"],
+)

@@ -7,7 +7,7 @@ module(
 
 bazel_dep(name = "bazel_skylib", version = "1.8.2")
 bazel_dep(name = "platforms", version = "1.1.0")
-bazel_dep(name = "rules_venv", version = "0.17.0")
+bazel_dep(name = "rules_venv", version = "0.19.0")
 bazel_dep(name = "rules_verilog", version = "1.1.1")
 
 register_toolchains(
@@ -56,5 +56,6 @@ register_toolchains(
     "//tools/toolchains:isort_toolchain",
     "//tools/toolchains:mypy_toolchain",
     "//tools/toolchains:pylint_toolchain",
+    "//tools/toolchains:pytest_toolchain",
     dev_dependency = True,
 )

@@ -2,6 +2,7 @@ load("@rules_venv//python/black:defs.bzl", "py_black_toolchain")
 load("@rules_venv//python/isort:defs.bzl", "py_isort_toolchain")
 load("@rules_venv//python/mypy:defs.bzl", "py_mypy_toolchain")
 load("@rules_venv//python/pylint:defs.bzl", "py_pylint_toolchain")
+load("@rules_venv//python/pytest:defs.bzl", "py_pytest_toolchain")
 
 py_black_toolchain(
     name = "py_black_toolchain",
@@ -49,4 +50,15 @@ toolchain(
     toolchain = ":py_pylint_toolchain",
     toolchain_type = "@rules_venv//python/pylint:toolchain_type",
     visibility = ["//visibility:public"],
+)
+
+py_pytest_toolchain(
+    name = "py_pytest_toolchain",
+    pytest = "@pip_deps//pytest",
+)
+
+toolchain(
+    name = "pytest_toolchain",
+    toolchain = ":py_pytest_toolchain",
+    toolchain_type = "@rules_venv//python/pytest:toolchain_type",
 )

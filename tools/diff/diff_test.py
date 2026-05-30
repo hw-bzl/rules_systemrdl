@@ -21,6 +21,22 @@ from pathlib import Path
 from python.runfiles import Runfiles
 
 
+def parse_args() -> argparse.Namespace:
+    """Parse command line arugments."""
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--file1",
+        required=True,
+        help="The runfiles `rlocationpath` of the first file (typically the golden).",
+    )
+    parser.add_argument(
+        "--file2",
+        required=True,
+        help="The runfiles `rlocationpath` of the second file (typically the actual).",
+    )
+    return parser.parse_args()
+
+
 def rlocation(runfiles: Runfiles, rlocationpath: str) -> Path:
     """Resolve a runfile path and ensure it exists."""
     # TODO: https://github.com/periareon/rules_venv/issues/37
@@ -42,18 +58,8 @@ def normalize(text: str) -> str:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--file1",
-        required=True,
-        help="The runfiles `rlocationpath` of the first file (typically the golden).",
-    )
-    parser.add_argument(
-        "--file2",
-        required=True,
-        help="The runfiles `rlocationpath` of the second file (typically the actual).",
-    )
-    args = parser.parse_args()
+    """The maoin entrypoint"""
+    args = parse_args()
 
     runfiles = Runfiles.Create()
     if not runfiles:
