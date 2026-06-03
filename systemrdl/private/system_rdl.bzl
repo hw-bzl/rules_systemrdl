@@ -13,6 +13,8 @@ SystemRdlInfo = provider(
     },
 )
 
+_NAME_PLACEHOLDER = "{name}"
+
 def _dirname_map(file):
     return file.dirname
 
@@ -27,6 +29,83 @@ def _extract_rename(exporter_args):
         if arg == "--rename":
             found_rename = True
     return None
+
+def _parse_output_descriptor(exporter, entry, kind):
+    """Parse a single `<id>=<pattern>` descriptor.
+
+    `kind` is supplied by the caller based on which toolchain attribute the
+    entry came from (`exporter_files` → file, `exporter_dirs` → dir).
+    Returns a struct(id, kind, pattern). Fails on anything malformed.
+    """
+    if "=" not in entry:
+        fail((
+            "Exporter `{exporter}` has a malformed output descriptor `{entry}`. " +
+            "Expected `<id>=<pattern>`, e.g. `sv={{name}}.sv` or " +
+            "`utils=regblock_pkg.vhdl`."
+        ).format(exporter = exporter, entry = entry))
+    id, _, pattern = entry.partition("=")
+    if not id:
+        fail("Exporter `{}` has an output descriptor with an empty id: `{}`".format(
+            exporter,
+            entry,
+        ))
+    for ch in id.elems():
+        if not (ch.isalnum() or ch == "_"):
+            fail((
+                "Exporter `{exporter}` has an output id `{id}` containing " +
+                "an illegal character `{ch}`. Ids must match [A-Za-z0-9_]."
+            ).format(exporter = exporter, id = id, ch = ch))
+    if not pattern:
+        fail("Exporter `{}` has output descriptor `{}` with an empty pattern".format(
+            exporter,
+            entry,
+        ))
+    return struct(id = id, kind = kind, pattern = pattern)
+
+def _parse_exporter_outputs(exporter_files, exporter_dirs):
+    """Parse the toolchain's `exporter_files` and `exporter_dirs` attributes.
+
+    Returns Dict[exporter_name, List[struct(id, kind, pattern)]] where kind
+    is "file" or "dir" depending on which attribute the entries came from.
+    Validates that an exporter is not registered under both attributes and
+    that ids are unique within each exporter.
+    """
+    parsed = {}
+    for source_dict, kind in [(exporter_files, "file"), (exporter_dirs, "dir")]:
+        for exporter, entries in source_dict.items():
+            if " " in exporter:
+                fail("Exporter name `{}` is illegal (no whitespace allowed)".format(exporter))
+            if exporter in parsed:
+                fail((
+                    "Exporter `{exporter}` is registered in both " +
+                    "`exporter_files` and `exporter_dirs`. An exporter " +
+                    "produces either files or a directory; pick one."
+                ).format(exporter = exporter))
+            if not entries:
+                fail("Exporter `{}` has no output descriptors".format(exporter))
+            descriptors = []
+            seen_ids = {}
+            for entry in entries:
+                desc = _parse_output_descriptor(exporter, entry, kind)
+                if desc.id in seen_ids:
+                    fail((
+                        "Exporter `{exporter}` declares output id `{id}` " +
+                        "twice (entries: `{prev}` and `{cur}`). Each id " +
+                        "within an exporter must be unique."
+                    ).format(
+                        exporter = exporter,
+                        id = desc.id,
+                        prev = seen_ids[desc.id],
+                        cur = entry,
+                    ))
+                seen_ids[desc.id] = entry
+                descriptors.append(desc)
+            parsed[exporter] = descriptors
+    return parsed
+
+def _render_pattern(pattern, output_name):
+    """Substitute the resolved output_name into a descriptor pattern."""
+    return pattern.replace(_NAME_PLACEHOLDER, output_name)
 
 def _system_rdl_library_impl(ctx):
     # Collect sources ensuring that root is removed from source list so it
@@ -52,15 +131,14 @@ def _system_rdl_library_impl(ctx):
     srcs = depset([root] + srcs, transitive = [dep[SystemRdlInfo].srcs for dep in ctx.attr.deps], order = "preorder")
 
     toolchain = ctx.toolchains[TOOLCHAIN_TYPE]
+    known_exporters = sorted(toolchain.exporter_outputs.keys())
 
-    exporter_outs = {}
-    output_groups = {}
     for exporter in ctx.attr.exporter_args:
-        if exporter not in toolchain.exporter_files and exporter not in toolchain.exporter_dirs:
+        if exporter not in toolchain.exporter_outputs:
             fail("Unsupported exporter command '{}'. Please update `{}` to use one of `{}`".format(
                 exporter,
                 ctx.label,
-                sorted(depset(toolchain.exporter_files.keys() + toolchain.exporter_dirs.keys()).to_list()),
+                known_exporters,
             ))
 
     rename_values = {}
@@ -69,62 +147,85 @@ def _system_rdl_library_impl(ctx):
         if rename != None:
             rename_values[exporter] = rename
 
-    for exporters, is_file_output in [
-        (toolchain.exporter_files, True),
-        (toolchain.exporter_dirs, False),
-    ]:
-        for exporter, extension in exporters.items():
-            rename = rename_values.get(exporter)
-            if rename != None:
-                output_name = rename
-            elif ctx.attr.output_name:
-                output_name = ctx.attr.output_name
+    exporter_outs = {}
+    output_groups = {}
+    for exporter, descriptors in toolchain.exporter_outputs.items():
+        rename = rename_values.get(exporter)
+        if rename != None:
+            output_name = rename
+        elif ctx.attr.output_name:
+            output_name = ctx.attr.output_name
+        else:
+            output_name = ctx.label.name
+
+        output_group_prefix = "system_rdl_{}".format(exporter)
+        all_outputs = []
+        file_outputs = []
+        dir_outputs = []
+        for desc in descriptors:
+            rendered = _render_pattern(desc.pattern, output_name)
+            if desc.kind == "file":
+                output = ctx.actions.declare_file(rendered)
+                file_outputs.append(output)
             else:
-                output_name = ctx.label.name
+                output = ctx.actions.declare_directory(rendered)
+                dir_outputs.append(output)
+            all_outputs.append(output)
+            output_groups["{}_{}".format(output_group_prefix, desc.id)] = depset([output])
 
-            output_group_name = "system_rdl_{}".format(exporter)
-            outputs = []
-            for ext in extension.split(","):
-                if is_file_output:
-                    name = "{}{}".format(output_name, ext)
-                    output = ctx.actions.declare_file(name)
-                    outputs.append(output)
-                    output_groups["{}{}".format(output_group_name, ext.replace(".", "_"))] = depset([output])
-                else:
-                    name = "{}{}".format(output_name, ext)
-                    output = ctx.actions.declare_directory(name)
-                    outputs.append(output)
-                    output_groups["{}{}".format(output_group_name, ext)] = depset([output])
+        args = ctx.actions.args()
+        args.add_joined("--bazel-outputs", all_outputs, join_with = ",", expand_directories = False)
+        args.add("--")
+        args.add("--peakrdl-cfg", toolchain.peakrdl_config)
+        args.add(exporter)
+        args.add_all(srcs)
+        args.add_all(toolchain.default_exporter_args.get(exporter, []))
+        args.add_all(ctx.attr.exporter_args.get(exporter, []))
 
-            args = ctx.actions.args()
-            args.add_joined("--bazel-outputs", outputs, join_with = ",", expand_directories = False)
-            args.add("--")
-            args.add("--peakrdl-cfg", toolchain.peakrdl_config)
-            args.add(exporter)
-            args.add_all(srcs)
-            args.add_all(toolchain.default_exporter_args.get(exporter, []))
-            args.add_all(ctx.attr.exporter_args.get(exporter, []))
+        # peakrdl takes a single `-o` per invocation pointing at an output
+        # location. For file outputs we hand it the directory the declared
+        # files live in; for directory outputs we hand it the declared
+        # directory path directly. Mixing the two within one exporter is not
+        # supported and shouldn't arise in practice.
+        if file_outputs and dir_outputs:
+            fail((
+                "Exporter `{exporter}` declares both file and directory " +
+                "outputs in the same invocation, which peakrdl does not " +
+                "support. Split them across separate exporter registrations."
+            ).format(exporter = exporter))
+        if file_outputs:
             args.add_all(
-                outputs,
+                file_outputs,
                 before_each = "-o",
                 expand_directories = False,
                 uniquify = True,
-                map_each = _dirname_map if is_file_output else None,
+                map_each = _dirname_map,
+            )
+        else:
+            args.add_all(
+                dir_outputs,
+                before_each = "-o",
+                expand_directories = False,
+                uniquify = True,
             )
 
-            ctx.actions.run(
-                mnemonic = "SystemRdl{}".format(exporter.capitalize()),
-                outputs = outputs,
-                executable = ctx.executable._peakrdl,
-                arguments = [args],
-                inputs = srcs,
-                tools = [toolchain.peakrdl_config],
-                execution_requirements = {"supports-path-mapping": ""},
-            )
+        mnemonic_suffix = "".join([
+            part.capitalize()
+            for part in exporter.replace("_", "-").split("-")
+        ])
+        ctx.actions.run(
+            mnemonic = "SystemRdl{}".format(mnemonic_suffix),
+            outputs = all_outputs,
+            executable = ctx.executable._peakrdl,
+            arguments = [args],
+            inputs = srcs,
+            tools = [toolchain.peakrdl_config],
+            execution_requirements = {"supports-path-mapping": ""},
+        )
 
-            output_set = depset(outputs)
-            exporter_outs[exporter] = output_set
-            output_groups[output_group_name] = output_set
+        output_set = depset(all_outputs)
+        exporter_outs[exporter] = output_set
+        output_groups[output_group_prefix] = output_set
 
     return [
         DefaultInfo(
@@ -269,34 +370,23 @@ Consumers who want to guarantee the outputs are generated from
 )
 
 def _system_rdl_toolchain_impl(ctx):
-    all_exporters = []
-    for group in [ctx.attr.exporter_files, ctx.attr.exporter_dirs]:
-        for exporter in group:
-            if " " in exporter:
-                fail("`{}` has an exporter with an illegal name: `{}`".format(
-                    ctx.label,
-                    exporter,
-                ))
+    exporter_outputs = _parse_exporter_outputs(
+        ctx.attr.exporter_files,
+        ctx.attr.exporter_dirs,
+    )
 
-            if exporter in all_exporters:
-                fail("`{}` has a duplicate exporter: `{}`".format(
-                    ctx.label,
-                    exporter,
-                ))
-            all_exporters.append(exporter)
-
+    known_exporters = sorted(exporter_outputs.keys())
     for key in ctx.attr.exporter_args:
-        if key not in ctx.attr.exporters:
+        if key not in exporter_outputs:
             fail("Args were given for `{}` but it's not a known exporter `{}`. Please update `{}`".format(
                 key,
-                sorted(ctx.attr.exporters.keys()),
+                known_exporters,
                 ctx.label,
             ))
 
     return [
         platform_common.ToolchainInfo(
-            exporter_files = ctx.attr.exporter_files,
-            exporter_dirs = ctx.attr.exporter_dirs,
+            exporter_outputs = exporter_outputs,
             default_exporter_args = ctx.attr.exporter_args,
             peakrdl = ctx.attr.peakrdl,
             peakrdl_config = ctx.file.peakrdl_config,
@@ -341,11 +431,18 @@ system_rdl_toolchain(
     peakrdl = ":peakrdl",
     peakrdl_config = "peakrdl.toml",
     exporter_files = {
-        "regblock": ".sv,_pkg.sv",
-        "toml": ".toml",
+        "regblock": [
+            "sv={name}.sv",
+            "pkg={name}_pkg.sv",
+        ],
+        "toml": [
+            "toml={name}.toml",
+        ],
     },
     exporter_dirs = {
-        "html": "_html",
+        "html": [
+            "dir={name}_html",
+        ],
     },
 )
 
@@ -369,25 +466,51 @@ Now with the toolchain configured. all `system_rdl_library` targets built
 in the same configuration as the registered toolchain will have an additional
 output group `system_rdl_toml` that is the output of the custom exporter.
 
+## Describing exporter outputs
+
+Each exporter is registered with a list of output descriptors of the form
+`<id>=<pattern>`. Exporters that produce regular files go in
+`exporter_files`; exporters that produce a directory go in `exporter_dirs`
+(an exporter cannot be registered in both).
+
+- `<id>` is a stable identifier used to address this specific output from
+  downstream consumers (e.g. the `system_rdl_<exporter>_<id>` output group,
+  or the `extract` attribute on `verilog_system_rdl_library` /
+  `vhdl_system_rdl_library`). Ids must be unique within an exporter and
+  match `[A-Za-z0-9_]+`.
+- `<pattern>` is the basename of the output. The literal token `{name}` is
+  expanded to the target's resolved output name (target name, the
+  `output_name` attribute, or `--rename`). Patterns without `{name}` are
+  fixed-name outputs the exporter always writes under that exact basename
+  (e.g. a shared utility package emitted by
+  `peakrdl regblock-vhdl --copy-utils-pkg`).
 """,
     implementation = _system_rdl_toolchain_impl,
     attrs = {
         "exporter_args": attr.string_list_dict(
             doc = "A pair of `exporters` keys to a list of default exporter args to apply to all rules.",
         ),
-        "exporter_dirs": attr.string_dict(
-            doc = "A mapping of exporters to expected output directories formats.",
+        "exporter_dirs": attr.string_list_dict(
+            doc = (
+                "A mapping of exporter name to a list of output " +
+                "descriptors `<id>=<pattern>` for exporters that produce " +
+                "a directory. See the rule's main documentation for the " +
+                "descriptor format."
+            ),
             default = {
-                "html": "_html",
+                "html": ["dir={name}_html"],
             },
-            allow_empty = False,
         ),
-        "exporter_files": attr.string_dict(
-            doc = "A mapping of exporters to expected output file formats.",
+        "exporter_files": attr.string_list_dict(
+            doc = (
+                "A mapping of exporter name to a list of output " +
+                "descriptors `<id>=<pattern>` for exporters that produce " +
+                "regular files. See the rule's main documentation for the " +
+                "descriptor format."
+            ),
             default = {
-                "regblock": ".sv,_pkg.sv",
+                "regblock": ["sv={name}.sv", "pkg={name}_pkg.sv"],
             },
-            allow_empty = False,
         ),
         "peakrdl": attr.label(
             doc = "The python library for the `peakrdl` package.",
