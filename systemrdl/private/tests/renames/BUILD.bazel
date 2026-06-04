@@ -29,7 +29,7 @@ system_rdl_output(
 system_rdl_output(
     name = "atxmega_spi_renamed_pkg_sv",
     lib = ":atxmega_spi_renamed",
-    output_group = "system_rdl_regblock_pkg_sv",
+    output_group = "system_rdl_regblock_pkg",
 )
 
 diff_test(

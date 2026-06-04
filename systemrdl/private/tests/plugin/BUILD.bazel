@@ -24,11 +24,14 @@ py_library(
 system_rdl_toolchain(
     name = "system_rdl_toolchain",
     exporter_dirs = {
-        "html": "_html",
+        "html": ["dir={name}_html"],
     },
     exporter_files = {
-        "regblock": ".sv,_pkg.sv",
-        "reglist": ".txt",
+        "regblock": [
+            "sv={name}.sv",
+            "pkg={name}_pkg.sv",
+        ],
+        "reglist": ["txt={name}.txt"],
     },
     peakrdl = ":peakrdl",
     peakrdl_config = "peakrdl.toml",
