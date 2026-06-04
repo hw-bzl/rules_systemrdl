@@ -298,11 +298,18 @@ system_rdl_toolchain(
     peakrdl = ":peakrdl",
     peakrdl_config = "peakrdl.toml",
     exporter_files = {
-        "regblock": ".sv,_pkg.sv",
-        "toml": ".toml",
+        "regblock": [
+            "sv={name}.sv",
+            "pkg={name}_pkg.sv",
+        ],
+        "toml": [
+            "toml={name}.toml",
+        ],
     },
     exporter_dirs = {
-        "html": "_html",
+        "html": [
+            "dir={name}_html",
+        ],
     },
 )
 
@@ -322,12 +329,30 @@ plugins.exporters.toml = "tools.system_rdl.peakrdl_toml:TomlExporter"
 <p>Now with the toolchain configured. all <code>system_rdl_library</code> targets built
 in the same configuration as the registered toolchain will have an additional
 output group <code>system_rdl_toml</code> that is the output of the custom exporter.</p>
+<h2 id="describing-exporter-outputs"><a class="header" href="#describing-exporter-outputs">Describing exporter outputs</a></h2>
+<p>Each exporter is registered with a list of output descriptors of the form
+<code>&lt;id&gt;=&lt;pattern&gt;</code>. Exporters that produce regular files go in
+<code>exporter_files</code>; exporters that produce a directory go in <code>exporter_dirs</code>
+(an exporter cannot be registered in both).</p>
+<ul>
+<li><code>&lt;id&gt;</code> is a stable identifier used to address this specific output from
+downstream consumers (e.g. the <code>system_rdl_&lt;exporter&gt;_&lt;id&gt;</code> output group,
+or the <code>extract</code> attribute on <code>verilog_system_rdl_library</code> /
+<code>vhdl_system_rdl_library</code>). Ids must be unique within an exporter and
+match <code>[A-Za-z0-9_]+</code>.</li>
+<li><code>&lt;pattern&gt;</code> is the basename of the output. The literal token <code>{name}</code> is
+expanded to the target's resolved output name (target name, the
+<code>output_name</code> attribute, or <code>--rename</code>). Patterns without <code>{name}</code> are
+fixed-name outputs the exporter always writes under that exact basename
+(e.g. a shared utility package emitted by
+<code>peakrdl regblock-vhdl --copy-utils-pkg</code>).</li>
+</ul>
 <p><strong>ATTRIBUTES</strong></p>
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
 <tr><td style="text-align: left"><a id="system_rdl_toolchain-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
 <tr><td style="text-align: left"><a id="system_rdl_toolchain-exporter_args"></a>exporter_args</td><td style="text-align: left">A pair of <code>exporters</code> keys to a list of default exporter args to apply to all rules.</td><td style="text-align: left"><a href="https://bazel.build/rules/lib/dict">Dictionary: String -&gt; List of strings</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>{}</code></td></tr>
-<tr><td style="text-align: left"><a id="system_rdl_toolchain-exporter_dirs"></a>exporter_dirs</td><td style="text-align: left">A mapping of exporters to expected output directories formats.</td><td style="text-align: left"><a href="https://bazel.build/rules/lib/dict">Dictionary: String -&gt; String</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>{"html": "_html"}</code></td></tr>
-<tr><td style="text-align: left"><a id="system_rdl_toolchain-exporter_files"></a>exporter_files</td><td style="text-align: left">A mapping of exporters to expected output file formats.</td><td style="text-align: left"><a href="https://bazel.build/rules/lib/dict">Dictionary: String -&gt; String</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>{"regblock": ".sv,_pkg.sv"}</code></td></tr>
+<tr><td style="text-align: left"><a id="system_rdl_toolchain-exporter_dirs"></a>exporter_dirs</td><td style="text-align: left">A mapping of exporter name to a list of output descriptors <code>&lt;id&gt;=&lt;pattern&gt;</code> for exporters that produce a directory. See the rule's main documentation for the descriptor format.</td><td style="text-align: left"><a href="https://bazel.build/rules/lib/dict">Dictionary: String -&gt; List of strings</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>{"html": ["dir={name}_html"]}</code></td></tr>
+<tr><td style="text-align: left"><a id="system_rdl_toolchain-exporter_files"></a>exporter_files</td><td style="text-align: left">A mapping of exporter name to a list of output descriptors <code>&lt;id&gt;=&lt;pattern&gt;</code> for exporters that produce regular files. See the rule's main documentation for the descriptor format.</td><td style="text-align: left"><a href="https://bazel.build/rules/lib/dict">Dictionary: String -&gt; List of strings</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>{"regblock": ["sv={name}.sv", "pkg={name}_pkg.sv"]}</code></td></tr>
 <tr><td style="text-align: left"><a id="system_rdl_toolchain-peakrdl"></a>peakrdl</td><td style="text-align: left">The python library for the <code>peakrdl</code> package.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
 <tr><td style="text-align: left"><a id="system_rdl_toolchain-peakrdl_config"></a>peakrdl_config</td><td style="text-align: left">The <code>peakrdl</code> config file.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
 </tbody></table>
@@ -342,13 +367,15 @@ output group <code>system_rdl_toml</code> that is the output of the custom expor
 <pre>
 load("@rules_systemrdl//systemrdl:verilog_system_rdl_library.bzl", "verilog_system_rdl_library")
 
-verilog_system_rdl_library(<a href="verilog_system_rdl_library.html#verilog_system_rdl_library-name">name</a>, <a href="verilog_system_rdl_library.html#verilog_system_rdl_library-exporter">exporter</a>, <a href="verilog_system_rdl_library.html#verilog_system_rdl_library-lib">lib</a>)
+verilog_system_rdl_library(<a href="verilog_system_rdl_library.html#verilog_system_rdl_library-name">name</a>, <a href="verilog_system_rdl_library.html#verilog_system_rdl_library-deps">deps</a>, <a href="verilog_system_rdl_library.html#verilog_system_rdl_library-exporter">exporter</a>, <a href="verilog_system_rdl_library.html#verilog_system_rdl_library-extract">extract</a>, <a href="verilog_system_rdl_library.html#verilog_system_rdl_library-lib">lib</a>)
 </pre>
 <p>A rule which extracts a <code>verilog_library</code> from a <code>system_rdl_library</code>.</p>
 <p><strong>ATTRIBUTES</strong></p>
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
 <tr><td style="text-align: left"><a id="verilog_system_rdl_library-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="verilog_system_rdl_library-deps"></a>deps</td><td style="text-align: left">Additional <code>verilog_library</code>-providing dependencies.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
 <tr><td style="text-align: left"><a id="verilog_system_rdl_library-exporter"></a>exporter</td><td style="text-align: left">The SystemRDL exporter whose output should be wrapped as a Verilog library.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>"regblock"</code></td></tr>
+<tr><td style="text-align: left"><a id="verilog_system_rdl_library-extract"></a>extract</td><td style="text-align: left">Output ids (from the toolchain's <code>exporter_outputs</code> descriptors for this exporter) to wrap into the <code>VerilogInfo</code>. Defaults to all ids the exporter declares.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
 <tr><td style="text-align: left"><a id="verilog_system_rdl_library-lib"></a>lib</td><td style="text-align: left">The <code>system_rdl_library</code> to extract Verilog from.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
