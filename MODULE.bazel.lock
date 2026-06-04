@@ -198,6 +198,8 @@
     "https://bcr.bazel.build/modules/rules_venv/0.7.0/MODULE.bazel": "20a844b0bbac189e11af899d09de249a7f766b361aa49f4870134136e6c4bd0d",
     "https://bcr.bazel.build/modules/rules_verilog/1.1.1/MODULE.bazel": "adcccf08f92e16936d6aa2e872f31a79e80712333be604de750d4b109fae1519",
     "https://bcr.bazel.build/modules/rules_verilog/1.1.1/source.json": "32a02fe6f97e1a233cff48e0eae70243e2e25d4c57fc684f933e06ef67440d8b",
+    "https://bcr.bazel.build/modules/rules_vhdl/0.1.1/MODULE.bazel": "ab5d17ab64fbd051bcab61fcd1171e2fce3df2ca418fa4563fdb94ea1abb0df9",
+    "https://bcr.bazel.build/modules/rules_vhdl/0.1.1/source.json": "244cf39c68c4240b0c75762b3da43fedda00150bb6345eca1b5d05facaecb068",
     "https://bcr.bazel.build/modules/stardoc/0.5.1/MODULE.bazel": "1a05d92974d0c122f5ccf09291442580317cdd859f07a8655f1db9a60374f9f8",
     "https://bcr.bazel.build/modules/stardoc/0.5.3/MODULE.bazel": "c7f6948dae6999bf0db32c1858ae345f112cacf98f174c7a8bb707e41b974f1c",
     "https://bcr.bazel.build/modules/stardoc/0.7.0/MODULE.bazel": "05e3d6d30c099b6770e97da986c53bd31844d7f13d41412480ea265ac9e8079c",

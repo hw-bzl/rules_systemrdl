@@ -1,10 +1,10 @@
-"""# verilog_system_rdl_library"""
+"""# vhdl_system_rdl_library"""
 
-load("@rules_verilog//verilog:verilog_info.bzl", "VerilogInfo")
+load("@rules_vhdl//vhdl:vhdl_info.bzl", "VhdlInfo")
 load("//systemrdl/private:system_rdl.bzl", "TOOLCHAIN_TYPE")
 load(":system_rdl_info.bzl", "SystemRdlInfo")
 
-def _verilog_system_rdl_library_impl(ctx):
+def _vhdl_system_rdl_library_impl(ctx):
     lib = ctx.attr.lib
 
     toolchain = ctx.toolchains[TOOLCHAIN_TYPE]
@@ -65,17 +65,18 @@ def _verilog_system_rdl_library_impl(ctx):
         srcs_depsets.append(getattr(lib[OutputGroupInfo], per_id_group))
     srcs = depset(transitive = srcs_depsets)
 
-    dep_infos = [dep[VerilogInfo] for dep in ctx.attr.deps]
+    dep_infos = [dep[VhdlInfo] for dep in ctx.attr.deps]
 
     return [
         DefaultInfo(
             files = srcs,
         ),
-        VerilogInfo(
+        VhdlInfo(
             srcs = srcs,
-            hdrs = depset(),
-            includes = depset(),
             data = depset(),
+            library = ctx.attr.library,
+            standard = ctx.attr.standard,
+            top_entity = "",
             deps = depset(
                 dep_infos,
                 order = "postorder",
@@ -84,31 +85,40 @@ def _verilog_system_rdl_library_impl(ctx):
         ),
     ]
 
-verilog_system_rdl_library = rule(
-    doc = "A rule which extracts a `verilog_library` from a `system_rdl_library`.",
-    implementation = _verilog_system_rdl_library_impl,
+vhdl_system_rdl_library = rule(
+    doc = "A rule which extracts a `vhdl_library` from a `system_rdl_library`.",
+    implementation = _vhdl_system_rdl_library_impl,
     attrs = {
         "deps": attr.label_list(
-            doc = "Additional `verilog_library`-providing dependencies.",
-            providers = [VerilogInfo],
+            doc = "Additional `vhdl_library`-providing dependencies.",
+            providers = [VhdlInfo],
         ),
         "exporter": attr.string(
-            doc = "The SystemRDL exporter whose output should be wrapped as a Verilog library.",
-            default = "regblock",
+            doc = "The SystemRDL exporter whose output should be wrapped as a VHDL library.",
+            default = "regblock-vhdl",
         ),
         "extract": attr.string_list(
             doc = (
                 "Output ids (from the toolchain's `exporter_outputs` " +
                 "descriptors for this exporter) to wrap into the " +
-                "`VerilogInfo`. Defaults to all ids the exporter declares."
+                "`VhdlInfo`. Defaults to all ids the exporter declares."
             ),
         ),
         "lib": attr.label(
-            doc = "The `system_rdl_library` to extract Verilog from.",
+            doc = "The `system_rdl_library` to extract VHDL from.",
             mandatory = True,
             providers = [SystemRdlInfo],
         ),
+        "library": attr.string(
+            doc = "VHDL library name this target compiles into.",
+            default = "work",
+        ),
+        "standard": attr.string(
+            doc = "VHDL standard version. Empty string means not specified; consumer rules apply their default.",
+            default = "",
+            values = ["", "1993", "2000", "2002", "2008", "2019"],
+        ),
     },
-    provides = [VerilogInfo],
+    provides = [VhdlInfo],
     toolchains = [TOOLCHAIN_TYPE],
 )
