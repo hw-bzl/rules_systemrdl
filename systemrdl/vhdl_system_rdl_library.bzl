@@ -74,7 +74,7 @@ def _vhdl_system_rdl_library_impl(ctx):
         VhdlInfo(
             srcs = srcs,
             data = depset(),
-            library = ctx.attr.library,
+            library = ctx.attr.library if ctx.attr.library else ctx.attr.lib.label.name,
             standard = ctx.attr.standard,
             top_entity = "",
             deps = depset(
@@ -110,8 +110,8 @@ vhdl_system_rdl_library = rule(
             providers = [SystemRdlInfo],
         ),
         "library": attr.string(
-            doc = "VHDL library name this target compiles into.",
-            default = "work",
+            doc = "VHDL library name this target compiles into. Defaults to `label.name` of `lib`.",
+            default = "",
         ),
         "standard": attr.string(
             doc = "VHDL standard version. Empty string means not specified; consumer rules apply their default.",

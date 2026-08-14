@@ -33,6 +33,7 @@ def _verilog_provider_test_impl(ctx):
     asserts.equals(env, [], verilog.includes.to_list(), "includes should be empty")
     asserts.equals(env, [], verilog.data.to_list(), "data should be empty")
     asserts.equals(env, [], verilog.deps.to_list(), "deps should be empty")
+    asserts.equals(env, "atxmega_spi", verilog.library, "library should default to `label.name` of `lib`")
 
     return analysistest.end(env)
 
@@ -40,7 +41,27 @@ verilog_system_rdl_library_provider_test = analysistest.make(
     _verilog_provider_test_impl,
 )
 
+def _verilog_explicit_library_test_impl(ctx):
+    env = analysistest.begin(ctx)
+
+    target = analysistest.target_under_test(env)
+    verilog = target[VerilogInfo]
+
+    asserts.equals(env, "custom_lib_name", verilog.library, "explicit `library` attr should be forwarded to `VerilogInfo.library`")
+
+    return analysistest.end(env)
+
+verilog_system_rdl_library_explicit_library_test = analysistest.make(
+    _verilog_explicit_library_test_impl,
+)
+
 def verilog_system_rdl_library_test_suite(*, name, **kwargs):
+    """Entry point for `verilog_system_rdl_library` analysis tests.
+
+    Args:
+        name: The name of the generated `test_suite`.
+        **kwargs: Additional keyword arguments forwarded to `test_suite`.
+    """
     verilog_system_rdl_library(
         name = "atxmega_spi_lib",
         lib = "//systemrdl/private/tests/simple:atxmega_spi",
@@ -51,10 +72,22 @@ def verilog_system_rdl_library_test_suite(*, name, **kwargs):
         target_under_test = ":atxmega_spi_lib",
     )
 
+    verilog_system_rdl_library(
+        name = "atxmega_spi_lib_explicit",
+        lib = "//systemrdl/private/tests/simple:atxmega_spi",
+        library = "custom_lib_name",
+    )
+
+    verilog_system_rdl_library_explicit_library_test(
+        name = "verilog_system_rdl_library_explicit_library_test",
+        target_under_test = ":atxmega_spi_lib_explicit",
+    )
+
     native.test_suite(
         name = name,
         tests = [
             ":verilog_system_rdl_library_provider_test",
+            ":verilog_system_rdl_library_explicit_library_test",
         ],
         **kwargs
     )

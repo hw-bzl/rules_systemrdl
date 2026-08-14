@@ -2,12 +2,12 @@
 
 module(
     name = "rules_systemrdl",
-    version = "0.4.1",
+    version = "0.5.0",
 )
 
 bazel_dep(name = "bazel_skylib", version = "1.8.2")
 bazel_dep(name = "platforms", version = "1.1.0")
-bazel_dep(name = "rules_venv", version = "0.19.0")
+bazel_dep(name = "rules_venv", version = "0.23.0")
 bazel_dep(name = "rules_verilog", version = "1.4.2")
 bazel_dep(name = "rules_vhdl", version = "0.4.1")
 
@@ -17,9 +17,9 @@ register_toolchains(
 )
 
 bazel_dep(name = "stardoc", version = "0.8.0", dev_dependency = True, repo_name = "io_bazel_stardoc")
-bazel_dep(name = "rules_rust_mdbook", version = "0.71.3", dev_dependency = True)
+bazel_dep(name = "rules_rust_mdbook", version = "0.73.0", dev_dependency = True)
 bazel_dep(name = "rules_shell", version = "0.6.1", dev_dependency = True)
-bazel_dep(name = "rules_req_compile", version = "1.1.0", dev_dependency = True)
+bazel_dep(name = "rules_req_compile", version = "1.1.3", dev_dependency = True)
 
 python = use_extension("@rules_venv//python/extensions:python.bzl", "python", dev_dependency = True)
 python.toolchain(

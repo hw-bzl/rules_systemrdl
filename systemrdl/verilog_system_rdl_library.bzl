@@ -81,6 +81,7 @@ def _verilog_system_rdl_library_impl(ctx):
                 order = "postorder",
                 transitive = [d.deps for d in dep_infos],
             ),
+            library = ctx.attr.library if ctx.attr.library else ctx.attr.lib.label.name,
         ),
     ]
 
@@ -107,6 +108,10 @@ verilog_system_rdl_library = rule(
             doc = "The `system_rdl_library` to extract Verilog from.",
             mandatory = True,
             providers = [SystemRdlInfo],
+        ),
+        "library": attr.string(
+            doc = "Verilog library name this target compiles into. Defaults to `label.name` of `lib`.",
+            default = "",
         ),
     },
     provides = [VerilogInfo],
