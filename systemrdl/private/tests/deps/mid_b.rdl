@@ -1,0 +1,7 @@
+// Depends on `leaf.rdl`. Together with `mid_a.rdl` this forms a diamond
+// when both are consumed by `top.rdl`.
+addrmap mid_b {
+    name = "Mid B";
+
+    leaf leaf_inst @ 0x0;
+};

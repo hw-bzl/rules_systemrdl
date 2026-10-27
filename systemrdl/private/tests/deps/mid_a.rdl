@@ -1,0 +1,8 @@
+// Depends on `leaf.rdl` (instantiates both the `leaf` addrmap and the bare
+// `leaf_ctrl` register type).
+addrmap mid_a {
+    name = "Mid A";
+
+    leaf leaf_inst @ 0x0;
+    leaf_ctrl extra @ 0x100;
+};

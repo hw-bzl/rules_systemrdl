@@ -1,0 +1,4 @@
+0x0 status
+0x1000 a.leaf_inst.ctrl
+0x1100 a.extra
+0x2000 b.leaf_inst.ctrl

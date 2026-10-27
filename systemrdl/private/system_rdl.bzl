@@ -113,22 +113,38 @@ def _system_rdl_library_impl(ctx):
     # https://peakrdl.readthedocs.io/en/latest/processing-input.html
     root = ctx.file.root
     srcs = []
-    if not root:
-        if len(ctx.files.srcs) == 1:
-            root = ctx.files.srcs[0]
-        else:
-            for src in ctx.files.srcs:
-                basename, _, _ = src.basename.rpartition(".")
-                if basename != ctx.label.name:
-                    srcs.append(src)
-                    continue
-                if root:
-                    fail("Multiple source files match candidates for `root`. Please explicitly assign one to this attribute for {}".format(
-                        ctx.label,
-                    ))
-                root = src
+    if root:
+        srcs = [src for src in ctx.files.srcs if src != root]
+    elif len(ctx.files.srcs) == 1:
+        root = ctx.files.srcs[0]
+    else:
+        for src in ctx.files.srcs:
+            basename, _, _ = src.basename.rpartition(".")
+            if basename != ctx.label.name:
+                srcs.append(src)
+                continue
+            if root:
+                fail("Multiple source files match candidates for `root`. Please explicitly assign one to this attribute for {}".format(
+                    ctx.label,
+                ))
+            root = src
 
-    srcs = depset([root] + srcs, transitive = [dep[SystemRdlInfo].srcs for dep in ctx.attr.deps], order = "preorder")
+    if not root:
+        fail("Unable to infer `root` for {}: no file in `srcs` is named `{}.rdl`. Please explicitly assign the `root` attribute.".format(
+            ctx.label,
+            ctx.label.name,
+        ))
+
+    # peakrdl compiles input files in command-line order and a file may only
+    # reference components defined in files that precede it. `postorder`
+    # yields the transitive dependencies first (each dependency's own root
+    # last within its subtree), followed by this library's non-root sources,
+    # and finally the root so it is the last addrmap peakrdl sees.
+    srcs = depset(
+        srcs + [root],
+        transitive = [dep[SystemRdlInfo].srcs for dep in ctx.attr.deps],
+        order = "postorder",
+    )
 
     toolchain = ctx.toolchains[TOOLCHAIN_TYPE]
     known_exporters = sorted(toolchain.exporter_outputs.keys())
@@ -271,7 +287,7 @@ filegroup(
     implementation = _system_rdl_library_impl,
     attrs = {
         "deps": attr.label_list(
-            doc = "Additional `system_rdl_library` dependencies.",
+            doc = "Additional `system_rdl_library` dependencies. Their sources are passed to peakrdl before this library's own sources.",
             providers = [SystemRdlInfo],
         ),
         "exporter_args": attr.string_list_dict(
@@ -281,11 +297,11 @@ filegroup(
             doc = "Basename used for declared outputs (and validated against the root file's top-level addrmap). Defaults to the target name. Use this when the addrmap name in the SystemRDL source differs from the target name.",
         ),
         "root": attr.label(
-            doc = "The top source file of the SystemRDL library.",
+            doc = "The top source file of the SystemRDL library. It is always passed to peakrdl last, after all `deps` and other `srcs`. If unset and `srcs` has a single file, that file is used; otherwise the file in `srcs` named `<name>.rdl` is used.",
             allow_single_file = [".rdl"],
         ),
         "srcs": attr.label_list(
-            doc = "Source files which define the entire SystemRDL dag.",
+            doc = "Source files which define the entire SystemRDL dag. Non-root files are passed to peakrdl in the order listed, after all `deps` and before `root`.",
             allow_files = [".rdl"],
             mandatory = True,
         ),

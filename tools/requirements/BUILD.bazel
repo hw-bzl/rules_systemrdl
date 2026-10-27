@@ -45,12 +45,15 @@ config_setting(
     visibility = ["//visibility:public"],
 )
 
-PLATFORMS = [
-    "linux_aarch64",
-    "linux_x86_64",
-    "macos_aarch64",
-    "windows_x86_64",
-]
+# Wheel platform tags, keyed by the suffix of the solution file they produce.
+# All solutions are compiled together by a single `py_reqs_compiler` so every
+# platform pins the same version of each package.
+PLATFORMS = {
+    "linux_aarch64": "manylinux_2_28_aarch64",
+    "linux_x86_64": "manylinux_2_28_x86_64",
+    "macos_aarch64": "macosx_11_0_arm64",
+    "windows_x86_64": "win_amd64",
+}
 
 filegroup(
     name = "requirements_in",
@@ -60,31 +63,21 @@ filegroup(
     ],
 )
 
-[
-    py_reqs_compiler(
-        name = "requirements.{}.update".format(platform),
-        requirements_in = "requirements_in",
-        requirements_txt = "requirements_{}.txt".format(platform),
-        target_compatible_with = select({
-            ":{}".format(platform): [],
-            "//conditions:default": ["@platforms//:incompatible"],
-        }),
-    )
-    for platform in PLATFORMS
-]
+py_reqs_compiler(
+    name = "requirements.update",
+    requirements_in = ":requirements_in",
+    requirements_txts = {
+        "requirements_{}.txt".format(name): platform
+        for name, platform in PLATFORMS.items()
+    },
+)
 
-[
-    py_reqs_solution_test(
-        name = "requirements_{}_test".format(platform),
-        compiler = ":requirements.{}.update".format(platform),
-    )
-    for platform in PLATFORMS
-]
+py_reqs_solution_test(
+    name = "requirements_test",
+    compiler = ":requirements.update",
+)
 
 alias(
     name = "update",
-    actual = select({
-        ":{}".format(platform): ":requirements.{}.update".format(platform)
-        for platform in PLATFORMS
-    }),
+    actual = ":requirements.update",
 )

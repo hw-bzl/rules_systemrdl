@@ -1,0 +1,44 @@
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+load("//systemrdl:system_rdl_library.bzl", "system_rdl_library")
+load("//systemrdl/private/tests/deps:deps_test.bzl", "deps_test_suite")
+
+# The same diamond as the parent package, but `root` is set explicitly and the
+# target name does not match the root's basename. This bypasses root inference
+# and guards against the non-root `srcs` (here `top_types.rdl`) being dropped
+# when `root` is given. It lives in its own package so its `top.sv` output
+# does not collide with the parent package's.
+system_rdl_library(
+    name = "top_explicit_root",
+    srcs = [
+        "//systemrdl/private/tests/deps:top.rdl",
+        "//systemrdl/private/tests/deps:top_types.rdl",
+    ],
+    exporter_args = {
+        "regblock": [
+            "--cpuif",
+            "axi4-lite-flat",
+        ],
+    },
+    output_name = "top",
+    root = "//systemrdl/private/tests/deps:top.rdl",
+    deps = [
+        "//systemrdl/private/tests/deps:mid_a",
+        "//systemrdl/private/tests/deps:mid_b",
+    ],
+)
+
+filegroup(
+    name = "top_explicit_root_regblock",
+    srcs = [":top_explicit_root"],
+    output_group = "system_rdl_regblock",
+)
+
+build_test(
+    name = "explicit_root_regblock_build_test",
+    targets = [":top_explicit_root_regblock"],
+)
+
+deps_test_suite(
+    name = "explicit_root_test_suite",
+    top = ":top_explicit_root",
+)

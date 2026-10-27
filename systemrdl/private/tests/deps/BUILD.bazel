@@ -1,0 +1,112 @@
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+load("//systemrdl:system_rdl_library.bzl", "system_rdl_library")
+load("//systemrdl:system_rdl_output.bzl", "system_rdl_output")
+load("//systemrdl/private/tests/plugin:plugin_test.bzl", "with_extra_toolchain")
+load("//tools/diff:diff_test.bzl", "diff_test")
+load(":deps_test.bzl", "deps_test_suite")
+
+# Regression coverage for source ordering across `deps`.
+#
+# peakrdl compiles its input files in command-line order, so a file may only
+# reference components defined in files that precede it. `system_rdl_library`
+# therefore must hand peakrdl transitive dependencies first, then any sibling
+# (non-root) sources, and the library's `root` last. The targets below build a
+# diamond:
+#
+#         leaf
+#        /    \
+#     mid_a  mid_b
+#        \    /
+#         top  (srcs = top_types.rdl + top.rdl)
+#
+# and the tests assert both the exact ordering surfaced through providers /
+# the peakrdl command line and that the graph actually compiles end-to-end.
+
+exports_files(
+    [
+        "top.rdl",
+        "top_types.rdl",
+    ],
+    visibility = ["//systemrdl/private/tests/deps:__subpackages__"],
+)
+
+system_rdl_library(
+    name = "leaf",
+    srcs = ["leaf.rdl"],
+)
+
+system_rdl_library(
+    name = "mid_a",
+    srcs = ["mid_a.rdl"],
+    visibility = ["//systemrdl/private/tests/deps:__subpackages__"],
+    deps = [":leaf"],
+)
+
+system_rdl_library(
+    name = "mid_b",
+    srcs = ["mid_b.rdl"],
+    visibility = ["//systemrdl/private/tests/deps:__subpackages__"],
+    deps = [":leaf"],
+)
+
+# `root` is inferred from the target name (`top` -> `top.rdl`); `top_types.rdl`
+# is a sibling source that must land before the root but after all deps.
+system_rdl_library(
+    name = "top",
+    srcs = [
+        "top.rdl",
+        "top_types.rdl",
+    ],
+    exporter_args = {
+        "regblock": [
+            "--cpuif",
+            "axi4-lite-flat",
+        ],
+    },
+    deps = [
+        ":mid_a",
+        ":mid_b",
+    ],
+)
+
+# End-to-end: peakrdl must successfully compile the full graph and produce
+# the `top` regblock outputs. With the wrong ordering this fails at compile
+# time (`top.rdl` would reference undefined identifiers).
+filegroup(
+    name = "top_regblock",
+    srcs = [":top"],
+    output_group = "system_rdl_regblock",
+)
+
+build_test(
+    name = "deps_regblock_build_test",
+    targets = [":top_regblock"],
+)
+
+# End-to-end content check: the `reglist` plugin exporter dumps every register
+# reachable from the elaborated top node. This confirms `top` (not one of its
+# dependencies' addrmaps) was elaborated and that the dependency registers
+# landed at the expected offsets.
+with_extra_toolchain(
+    name = "top_with_plugin",
+    extra_toolchain = "//systemrdl/private/tests/plugin:toolchain",
+    target = ":top",
+)
+
+system_rdl_output(
+    name = "top_reglist",
+    exporter = "reglist",
+    lib = ":top_with_plugin",
+)
+
+diff_test(
+    name = "deps_reglist_output_test",
+    file1 = "expected_reglist.txt",
+    file2 = ":top_reglist",
+)
+
+deps_test_suite(
+    name = "deps_test_suite",
+    mid_a = ":mid_a",
+    top = ":top",
+)

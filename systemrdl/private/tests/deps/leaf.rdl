@@ -1,0 +1,18 @@
+// Leaf of the dependency diamond. Defines a reusable register type and an
+// addrmap that the `mid_*` libraries instantiate. Nothing here references
+// any other file, so it must be the first file handed to peakrdl.
+reg leaf_ctrl {
+    name = "Leaf control";
+    default sw = rw;
+    default hw = r;
+
+    field {
+        desc = "Enable";
+    } EN[0:0] = 0;
+};
+
+addrmap leaf {
+    name = "Leaf block";
+
+    leaf_ctrl ctrl @ 0x0;
+};

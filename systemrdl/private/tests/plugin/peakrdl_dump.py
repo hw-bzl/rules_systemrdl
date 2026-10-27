@@ -4,16 +4,22 @@ import argparse
 import os
 
 from peakrdl.plugins.exporter import ExporterSubcommandPlugin
-from systemrdl.node import AddrmapNode
+from systemrdl.node import AddrmapNode, RegNode
 
 
 class ReglistExporter(ExporterSubcommandPlugin):
-    """Write one line per register: ``0x<address> <inst_name>``."""
+    """Write one line per register: ``0x<absolute_address> <path.from.top>``.
+
+    Registers are listed recursively (nested addrmaps / regfiles included) so
+    the dump reflects the full elaborated hierarchy under ``top_node``.
+    """
 
     short_desc: str = "List register addresses and names to text"
 
     def do_export(self, top_node: AddrmapNode, options: argparse.Namespace) -> None:
         path: str = os.path.join(options.output, top_node.inst_name + ".txt")
         with open(path, "w", encoding="utf-8") as f:
-            for reg in top_node.registers():
-                f.write(f"0x{reg.address_offset:x} {reg.inst_name}\n")
+            for node in top_node.descendants():
+                if not isinstance(node, RegNode):
+                    continue
+                f.write(f"0x{node.absolute_address:x} {node.get_rel_path(top_node)}\n")

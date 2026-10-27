@@ -1,0 +1,11 @@
+// A sibling (non-root) source of the `top` library. `top.rdl` references
+// `top_status`, so this must be compiled before the root.
+reg top_status {
+    name = "Top status";
+    default sw = r;
+    default hw = w;
+
+    field {
+        desc = "Busy";
+    } BUSY[0:0] = 0;
+};

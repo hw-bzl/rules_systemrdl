@@ -1,0 +1,11 @@
+// Root of the `top` library. References a type from its sibling source
+// `top_types.rdl` and addrmaps from both `mid_a` and `mid_b` dependencies.
+// It must be the last file handed to peakrdl so that every identifier it
+// uses is already defined and so that `top` is the final (elaborated) addrmap.
+addrmap top {
+    name = "Top";
+
+    top_status status @ 0x0;
+    mid_a a @ 0x1000;
+    mid_b b @ 0x2000;
+};

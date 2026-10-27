@@ -41,6 +41,7 @@ toolchain(
     name = "toolchain",
     toolchain = ":system_rdl_toolchain",
     toolchain_type = "//systemrdl:toolchain_type",
+    visibility = ["//systemrdl/private/tests:__subpackages__"],
 )
 
 with_extra_toolchain(
